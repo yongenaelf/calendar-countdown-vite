@@ -11,7 +11,7 @@ import {
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/calendar-countdown-vite">
       <Routes>
         <Route path="/" element={<WelcomeScreen />} />
         <Route path="/holidays" element={<HolidayListScreen />} />
