@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Holiday Screen</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2badee",
+              "background-light": "#f6f7f8",
+              "background-dark": "#101c22",
+              "surface-dark": "#1c2a33",
+              "surface-light": "#ffffff",
+              "text-secondary": "#9db0b9",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom scrollbar hide for cleaner mobile look */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto bg-background-light dark:bg-background-dark shadow-2xl overflow-y-auto no-scrollbar">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 flex items-center justify-between bg-surface-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-3 border-b border-slate-200 dark:border-slate-800 transition-colors">
+<button class="text-primary text-base font-normal leading-normal tracking-[0.015em] shrink-0 active:opacity-70 transition-opacity">
+                Cancel
+            </button>
+<h2 class="text-slate-900 dark:text-white text-[17px] font-semibold leading-tight tracking-[-0.015em] text-center flex-1">
+                Add Holiday
+            </h2>
+<button class="text-primary text-base font-bold leading-normal tracking-[0.015em] shrink-0 active:opacity-70 transition-opacity">
+                Save
+            </button>
+</header>
+<!-- Main Content -->
+<main class="flex-1 w-full px-4 py-6 space-y-6">
+<!-- Group 1: Name and Category -->
+<div class="flex flex-col gap-px overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700/50 shadow-sm">
+<!-- Name Input -->
+<div class="flex items-center px-4 py-1">
+<input class="w-full bg-transparent border-none p-3 text-[17px] text-slate-900 dark:text-white placeholder:text-text-secondary focus:ring-0 focus:outline-none" placeholder="Holiday Name (e.g. Mom's Birthday)" type="text"/>
+</div>
+<!-- Divider -->
+<div class="h-px w-full bg-slate-200 dark:bg-slate-700/50 ml-4"></div>
+<!-- Icon/Category Picker -->
+<div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+<span class="text-[17px] text-slate-900 dark:text-white font-normal">Icon</span>
+<div class="flex items-center gap-2">
+<span class="text-2xl">🎉</span>
+<span class="material-symbols-outlined text-text-secondary text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Group 2: Timing -->
+<div class="flex flex-col gap-px overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700/50 shadow-sm">
+<!-- All Day Toggle -->
+<div class="flex items-center justify-between px-4 py-3">
+<span class="text-[17px] text-slate-900 dark:text-white font-normal">All Day</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-[51px] h-[31px] bg-slate-200 peer-focus:outline-none dark:bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-[27px] after:w-[27px] after:transition-all peer-checked:bg-primary shadow-inner"></div>
+</label>
+</div>
+<!-- Divider -->
+<div class="h-px w-full bg-slate-200 dark:bg-slate-700/50 ml-4"></div>
+<!-- Date Picker Trigger -->
+<div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
+<span class="text-[17px] text-slate-900 dark:text-white font-normal">Date</span>
+<div class="px-3 py-1.5 rounded-md bg-slate-100 dark:bg-slate-800 text-primary group-hover:bg-primary/10 transition-colors">
+<span class="text-[17px] font-medium">Nov 24, 2024</span>
+</div>
+</div>
+<!-- Inline Date Picker (Visually simulated as expanded) -->
+<div class="border-t border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-[#152026] p-2 flex justify-center">
+<!-- This is a visual representation of an iOS date picker wheel -->
+<div class="w-full h-40 relative flex justify-center overflow-hidden mask-image-gradient">
+<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-9 bg-slate-200/50 dark:bg-slate-700/30 rounded-lg pointer-events-none z-0 mx-4"></div>
+<div class="flex w-full justify-around z-10 text-center">
+<!-- Months -->
+<div class="w-1/3 space-y-3 pt-12 text-lg">
+<div class="text-text-secondary">October</div>
+<div class="text-slate-900 dark:text-white font-medium">November</div>
+<div class="text-text-secondary">December</div>
+<div class="text-text-secondary">January</div>
+</div>
+<!-- Days -->
+<div class="w-1/3 space-y-3 pt-12 text-lg">
+<div class="text-text-secondary">23</div>
+<div class="text-slate-900 dark:text-white font-medium">24</div>
+<div class="text-text-secondary">25</div>
+<div class="text-text-secondary">26</div>
+</div>
+<!-- Years -->
+<div class="w-1/3 space-y-3 pt-12 text-lg">
+<div class="text-text-secondary">2023</div>
+<div class="text-slate-900 dark:text-white font-medium">2024</div>
+<div class="text-text-secondary">2025</div>
+<div class="text-text-secondary">2026</div>
+</div>
+</div>
+<!-- Top and Bottom Fade Overlays -->
+<div class="absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-slate-50 dark:from-[#152026] to-transparent pointer-events-none z-20"></div>
+<div class="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-slate-50 dark:from-[#152026] to-transparent pointer-events-none z-20"></div>
+</div>
+</div>
+</div>
+<!-- Group 3: Settings -->
+<div class="flex flex-col gap-px overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700/50 shadow-sm">
+<!-- Repeat -->
+<div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+<span class="text-[17px] text-slate-900 dark:text-white font-normal">Repeat</span>
+<div class="flex items-center gap-2">
+<span class="text-[17px] text-text-secondary">Yearly</span>
+<span class="material-symbols-outlined text-text-secondary text-xl">chevron_right</span>
+</div>
+</div>
+<!-- Divider -->
+<div class="h-px w-full bg-slate-200 dark:bg-slate-700/50 ml-4"></div>
+<!-- Reminder -->
+<div class="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+<span class="text-[17px] text-slate-900 dark:text-white font-normal">Reminder</span>
+<div class="flex items-center gap-2">
+<span class="text-[17px] text-text-secondary">On day of event</span>
+<span class="material-symbols-outlined text-text-secondary text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Group 4: Notes -->
+<div class="flex flex-col gap-px overflow-hidden rounded-xl bg-surface-light dark:bg-surface-dark border border-slate-200 dark:border-slate-700/50 shadow-sm">
+<textarea class="w-full bg-transparent border-none p-4 text-[17px] text-slate-900 dark:text-white placeholder:text-text-secondary focus:ring-0 focus:outline-none min-h-[120px] resize-none" placeholder="Notes"></textarea>
+</div>
+<!-- Bottom Hint/Info -->
+<div class="px-4">
+<p class="text-[13px] text-text-secondary text-center leading-normal">
+                    This holiday will be added to your local calendar and sync across your devices.
+                </p>
+</div>
+</main>
+</div>
+</body></html>

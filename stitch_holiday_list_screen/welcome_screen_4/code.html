@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Holiday Countdown - Welcome</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2badee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111618] dark:text-white antialiased">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl">
+<!-- Hero Section -->
+<div class="flex-1 flex flex-col">
+<div class="@container p-4 pb-0">
+<div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden rounded-xl min-h-[400px] relative shadow-lg" data-alt="Vibrant fireworks and holiday decorations collage" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB2pGXEVQdvg8zMpZSMyTxj5eSyod44eODnN6qpzvJtOfM707AgNFEFm3fFUasZti10685JhGLhdkWQVmoVIBZxJoX_adqpJrzMgQdFV1Xy9koD64gajhgI8OyLgVW7Co7yQ_L9qtgg57GiGjWA8TbYvD2HgiHkNOtj7GpzHlpYwo5_sL2vgJjFquT_6q3UbU8RmfcFkq511nZmMqfouPJh1ZSP1qBRMKwjXW7zfbE7rgERL07vHlmgKl17l4Sm6YlUUNZOVv2PIQFF");'>
+<!-- Gradient Overlay for better text readability later if needed, mostly aesthetic here -->
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/90 via-background-dark/40 to-transparent"></div>
+<!-- Logo Area inside Hero -->
+<div class="absolute top-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-background-dark/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
+<span class="material-symbols-outlined text-primary" style="font-size: 24px;">hourglass_top</span>
+<span class="text-white font-bold text-sm tracking-wide uppercase">Countdown</span>
+</div>
+<!-- Floating Date Badge Decoration -->
+<div class="absolute bottom-6 right-6 bg-background-dark/60 backdrop-blur-md p-3 rounded-xl border border-white/10 shadow-xl rotate-[-3deg] animate-pulse">
+<div class="flex flex-col items-center">
+<span class="text-xs text-primary font-bold uppercase tracking-wider">Upcoming</span>
+<span class="text-2xl font-black text-white">05</span>
+<span class="text-xs text-gray-300">Days left</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content Section -->
+<div class="flex flex-col px-6 pt-8 pb-4">
+<h1 class="text-[#111618] dark:text-white tracking-tight text-[32px] font-extrabold leading-tight text-center">
+                    Anticipate <span class="text-primary">Every Moment</span>
+</h1>
+<p class="text-[#637588] dark:text-[#9db0b9] text-base font-normal leading-relaxed pt-3 text-center max-w-[320px] mx-auto">
+                    Track birthdays, national holidays, and personal milestones with beautiful countdowns.
+                </p>
+</div>
+<!-- Features Grid -->
+<div class="flex flex-col gap-4 px-6 py-6">
+<!-- Feature 1 -->
+<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined" style="font-size: 24px;">calendar_month</span>
+</div>
+<div class="flex flex-col">
+<h2 class="text-[#111618] dark:text-white text-base font-bold leading-tight">Sync Calendars</h2>
+<p class="text-[#637588] dark:text-[#9db0b9] text-sm font-normal">Import from Apple Calendar &amp; ICS files</p>
+</div>
+</div>
+<!-- Feature 2 -->
+<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined" style="font-size: 24px;">public</span>
+</div>
+<div class="flex flex-col">
+<h2 class="text-[#111618] dark:text-white text-base font-bold leading-tight">Explore Holidays</h2>
+<p class="text-[#637588] dark:text-[#9db0b9] text-sm font-normal">Quick add by Country &amp; Religion</p>
+</div>
+</div>
+<!-- Feature 3 -->
+<div class="flex items-center gap-4 p-3 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined" style="font-size: 24px;">widgets</span>
+</div>
+<div class="flex flex-col">
+<h2 class="text-[#111618] dark:text-white text-base font-bold leading-tight">Home Widgets</h2>
+<p class="text-[#637588] dark:text-[#9db0b9] text-sm font-normal">Beautiful widgets for your Home Screen</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Action -->
+<div class="mt-auto px-6 pt-2 pb-8 bg-background-light dark:bg-background-dark">
+<button class="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-xl h-14 px-5 bg-primary hover:bg-primary/90 transition-all text-[#111618] text-lg font-bold leading-normal tracking-wide shadow-lg shadow-primary/25">
+<span class="truncate">Get Started</span>
+</button>
+<div class="flex justify-center gap-6 mt-4">
+<a class="text-xs text-[#637588] dark:text-[#9db0b9] hover:text-primary transition-colors" href="#">Restore Purchase</a>
+<a class="text-xs text-[#637588] dark:text-[#9db0b9] hover:text-primary transition-colors" href="#">Privacy Policy</a>
+</div>
+</div>
+</div>
+</body></html>

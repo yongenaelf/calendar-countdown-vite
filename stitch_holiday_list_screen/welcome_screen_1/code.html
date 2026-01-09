@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Holiday Countdown - Welcome</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    joy: {
+                        yellow: '#FCD34D', // vibrant yellow
+                        orange: '#FB923C', // warm orange
+                        pink: '#F472B6',   // lively pink
+                        DEFAULT: '#FB923C',
+                    },
+                    relax: {
+                        blue: '#E0F2FE',   // soft blue (sky-100)
+                        green: '#DCFCE7',  // gentle green (green-100)
+                        bg: '#F8FAFC',     // very light slate background
+                    },
+                    primary: "#0EA5E9",
+                    secondary: "#F43F5E",
+                },
+                fontFamily: {
+                    "display": ["Inter", "sans-serif"]
+                },
+                borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "4xl": "2.5rem", "full": "9999px" },
+                boxShadow: {
+                    'soft': '0 20px 40px -10px rgba(186, 230, 253, 0.4)',
+                    'card': '0 4px 15px -2px rgba(0, 0, 0, 0.03)',
+                    'glow': '0 0 20px rgba(251, 146, 60, 0.4)',
+                }
+            },
+        },
+    }
+</script>
+<style>
+    body {
+        min-height: max(884px, 100dvh);
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 font-display text-slate-800 antialiased selection:bg-joy-orange selection:text-white">
+<div class="relative flex h-full min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-white/60 backdrop-blur-sm border-x border-white/40">
+<div class="relative w-full h-[45vh] min-h-[380px]">
+<div class="absolute inset-0 w-full h-full rounded-b-[3rem] overflow-hidden z-0 shadow-soft">
+<div class="absolute inset-0 bg-cover bg-center" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB2pGXEVQdvg8zMpZSMyTxj5eSyod44eODnN6qpzvJtOfM707AgNFEFm3fFUasZti10685JhGLhdkWQVmoVIBZxJoX_adqpJrzMgQdFV1Xy9koD64gajhgI8OyLgVW7Co7yQ_L9qtgg57GiGjWA8TbYvD2HgiHkNOtj7GpzHlpYwo5_sL2vgJjFquT_6q3UbU8RmfcFkq511nZmMqfouPJh1ZSP1qBRMKwjXW7zfbE7rgERL07vHlmgKl17l4Sm6YlUUNZOVv2PIQFF");'></div>
+<div class="absolute inset-0 bg-gradient-to-b from-white/10 via-transparent to-white/90"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-sky-100/40 to-transparent mix-blend-overlay"></div>
+</div>
+<div class="absolute top-16 left-8 animate-[bounce_3.5s_infinite]">
+<div class="bg-joy-yellow text-amber-900 p-4 rounded-2xl shadow-xl shadow-yellow-200/50 rotate-[-12deg] transform border-2 border-white/80">
+<span class="text-3xl filter drop-shadow-sm">🎉</span>
+</div>
+</div>
+<div class="absolute top-28 right-8 animate-[bounce_4.5s_infinite] delay-700">
+<div class="bg-sky-200 text-sky-800 p-3 rounded-2xl shadow-xl shadow-sky-200/50 rotate-[12deg] transform border-2 border-white/80">
+<span class="text-2xl filter drop-shadow-sm">✈️</span>
+</div>
+</div>
+<div class="absolute top-52 left-6 animate-[bounce_5s_infinite] delay-300">
+<div class="bg-joy-pink text-white p-2.5 rounded-xl shadow-xl shadow-pink-200/50 rotate-[-6deg] transform border-2 border-white/80">
+<span class="text-xl filter drop-shadow-sm">🏖️</span>
+</div>
+</div>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[88%] z-10 translate-y-8">
+<div class="bg-white rounded-[2rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] p-3.5 flex items-center gap-4 border border-white ring-4 ring-white/40">
+<div class="bg-emerald-50 w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-emerald-500 shadow-inner">
+<span class="material-symbols-outlined text-[28px] variation-filled">hourglass_top</span>
+</div>
+<div class="flex-1 py-1">
+<div class="flex items-center justify-between mb-1.5">
+<span class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider">Upcoming</span>
+<span class="text-[9px] text-slate-400 font-bold bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">Auto-Synced</span>
+</div>
+<div class="text-lg font-black text-slate-800 leading-none truncate">Summer Vacation</div>
+</div>
+<div class="bg-gradient-to-br from-joy-orange to-orange-400 text-white rounded-2xl min-w-[62px] h-16 flex flex-col items-center justify-center leading-none shadow-lg shadow-orange-100">
+<span class="text-3xl font-black tracking-tight">05</span>
+<span class="text-[10px] font-bold opacity-90 uppercase tracking-wide mt-0.5">Days</span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 flex flex-col px-7 pt-16 pb-10">
+<div class="text-center mb-10 relative mt-4">
+<h1 class="text-[2.5rem] font-black text-slate-800 mb-3 leading-[1.05] tracking-tight">
+                Countdown to <br/>
+<span class="relative inline-block text-joy-orange z-10">
+                    Joy &amp; Fun
+<svg class="absolute w-[110%] h-4 -bottom-1 -left-1 text-joy-yellow -z-10 opacity-100" preserveAspectRatio="none" viewBox="0 0 100 10">
+<path d="M0 5 Q 50 12 100 5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="7"></path>
+</svg>
+</span>
+</h1>
+<p class="text-slate-500 font-medium text-[15px] leading-relaxed max-w-[280px] mx-auto">
+                Turn waiting into a celebration. Track holidays and cheerful moments!
+            </p>
+</div>
+<div class="flex flex-col gap-3.5 mb-8">
+<div class="flex items-center gap-4 p-4 rounded-[1.25rem] bg-white border border-slate-50 shadow-card hover:shadow-soft hover:scale-[1.01] transition-all duration-300 group cursor-default">
+<div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-500 flex items-center justify-center shrink-0 group-hover:bg-sky-100 transition-colors">
+<span class="material-symbols-outlined text-[24px]">calendar_month</span>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800 mb-0.5">Smart Calendar Sync</h3>
+<p class="text-xs text-slate-400 font-medium">Import from files &amp; calendars</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-[1.25rem] bg-white border border-slate-50 shadow-card hover:shadow-soft hover:scale-[1.01] transition-all duration-300 group cursor-default">
+<div class="w-12 h-12 rounded-2xl bg-pink-50 text-pink-500 flex items-center justify-center shrink-0 group-hover:bg-pink-100 transition-colors">
+<span class="material-symbols-outlined text-[24px]">public</span>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800 mb-0.5">Global Holidays</h3>
+<p class="text-xs text-slate-400 font-medium">Add by country &amp; religion</p>
+</div>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-[1.25rem] bg-white border border-slate-50 shadow-card hover:shadow-soft hover:scale-[1.01] transition-all duration-300 group cursor-default">
+<div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shrink-0 group-hover:bg-amber-100 transition-colors">
+<span class="material-symbols-outlined text-[24px]">widgets</span>
+</div>
+<div>
+<h3 class="text-sm font-bold text-slate-800 mb-0.5">Home Widgets</h3>
+<p class="text-xs text-slate-400 font-medium">Keep excitement on screen</p>
+</div>
+</div>
+</div>
+<div class="mt-auto">
+<button class="w-full h-16 bg-gradient-to-r from-joy-orange to-joy-pink hover:from-orange-500 hover:to-pink-500 text-white rounded-2xl font-bold text-lg shadow-lg shadow-orange-200 transform transition-all active:scale-[0.98] flex items-center justify-center gap-3">
+                Start Counting Down
+                <span class="bg-white/20 rounded-full p-1 flex items-center justify-center">
+<span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+</span>
+</button>
+<div class="flex justify-center gap-6 mt-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+<a class="hover:text-joy-orange transition-colors" href="#">Restore Purchase</a>
+</div>
+</div>
+</div>
+</div>
+
+</body></html>

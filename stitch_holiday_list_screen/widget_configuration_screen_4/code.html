@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Widget Configuration</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2badee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                        "surface-dark": "#1c262c",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom Toggle Switch */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #2badee;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #2badee;
+        }
+        
+        /* Hide scrollbar for carousel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between px-4 py-4 bg-background-light dark:bg-background-dark z-10 shrink-0">
+<button class="text-slate-500 dark:text-slate-400 text-base font-medium active:text-primary transition-colors">
+                Cancel
+            </button>
+<h1 class="text-lg font-bold leading-tight tracking-[-0.015em]">Configure Widget</h1>
+<button class="size-8 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">restart_alt</span>
+</button>
+</header>
+<!-- Main Scrollable Content -->
+<main class="flex-1 overflow-y-auto overflow-x-hidden pb-24">
+<!-- Widget Preview Section -->
+<div class="flex flex-col items-center justify-center pt-6 pb-8 px-6 bg-gradient-to-b from-background-light to-white dark:from-background-dark dark:to-[#0d161b]">
+<!-- Live Preview Label -->
+<p class="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-4">Live Preview</p>
+<!-- iOS Widget Preview (Medium Size) -->
+<!-- Aspect Ratio approx 2:1 for medium widget -->
+<div class="relative w-full max-w-[340px] aspect-[1.91/1] rounded-3xl shadow-[0_20px_40px_-12px_rgba(0,0,0,0.5)] overflow-hidden group cursor-pointer ring-1 ring-white/10">
+<!-- Widget Background -->
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 hover:scale-105" data-alt="Snowy winter forest landscape background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD3QMVsxAz4_Sea_fevfiVEimn7ni3t9jhxLXFRtl8qjLNheugYq-WH_D5qsuuvqjenc5c4rKZdFSigcXqAMAVBYvJEj8eQpW5xW3WFzug4FEywcGx0SdJ1lgXOxMm1CpZE80zTf7qStg9Ac76GE9cYslSRoQt3hmHb1FsoEMvxJ56NUIwwkDY6uasX02-uz61urXG6y4VJg0ZnyrxZm8TS8As3T3QhIEE5fgyvQrCHab52K3UXHlF1yJhzs-lSWSj4QYhH85YmHkMw');">
+<!-- Dark Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30"></div>
+</div>
+<!-- Widget Content -->
+<div class="relative h-full w-full p-5 flex flex-col justify-between text-white">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-xs font-medium text-white/80 uppercase tracking-wide">Upcoming</span>
+<h3 class="text-xl font-bold leading-tight mt-0.5 drop-shadow-md">Christmas</h3>
+</div>
+<span class="material-symbols-outlined text-white/90 drop-shadow-md">celebration</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-5xl font-black tracking-tight drop-shadow-lg">12</span>
+<span class="text-lg font-medium text-white/90 drop-shadow-md">days left</span>
+</div>
+</div>
+</div>
+<!-- Size Selector (Segmented Button) -->
+<div class="mt-8 w-full max-w-[340px]">
+<div class="flex h-10 w-full items-center justify-center rounded-lg bg-slate-200 dark:bg-[#1c262c] p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-[0.2rem] px-2 text-slate-500 dark:text-slate-400 text-xs font-medium transition-all hover:text-slate-900 dark:hover:text-white">
+<span class="truncate">Small</span>
+<input class="invisible w-0 fixed" name="widget-size" type="radio" value="Small"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-[0.2rem] bg-white dark:bg-background-dark shadow-sm text-slate-900 dark:text-white text-xs font-medium transition-all">
+<span class="truncate">Medium</span>
+<input checked="" class="invisible w-0 fixed" name="widget-size" type="radio" value="Medium"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-[0.2rem] px-2 text-slate-500 dark:text-slate-400 text-xs font-medium transition-all hover:text-slate-900 dark:hover:text-white">
+<span class="truncate">Large</span>
+<input class="invisible w-0 fixed" name="widget-size" type="radio" value="Large"/>
+</label>
+</div>
+</div>
+</div>
+<!-- Configuration Tabs -->
+<div class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-slate-200 dark:border-[#2a343a] px-4">
+<div class="flex justify-between max-w-md mx-auto">
+<button class="flex flex-col items-center justify-center border-b-2 border-primary text-slate-900 dark:text-white pb-3 pt-4 flex-1 transition-colors">
+<span class="text-sm font-bold tracking-wide">Content</span>
+</button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-3 pt-4 flex-1 transition-colors">
+<span class="text-sm font-bold tracking-wide">Style</span>
+</button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-3 pt-4 flex-1 transition-colors">
+<span class="text-sm font-bold tracking-wide">Background</span>
+</button>
+</div>
+</div>
+<!-- Settings Content -->
+<div class="px-4 py-6 space-y-8 max-w-md mx-auto">
+<!-- Section: Holiday Source -->
+<div class="space-y-3">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 pl-1">Target</h3>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5">
+<!-- Item 1 -->
+<div class="flex items-center justify-between p-4 border-b border-slate-100 dark:border-white/5 active:bg-slate-50 dark:active:bg-white/5 cursor-pointer transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-lg">calendar_month</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Holiday Source</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">Manual Selection</span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-sm text-slate-400">Specific</span>
+<span class="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
+</div>
+</div>
+<!-- Item 2 -->
+<div class="flex items-center justify-between p-4 active:bg-slate-50 dark:active:bg-white/5 cursor-pointer transition-colors">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-500">
+<span class="material-symbols-outlined text-lg">event</span>
+</div>
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Select Holiday</span>
+<span class="text-xs text-primary">Christmas (Dec 25)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-400 text-lg">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Section: Quick Themes -->
+<div class="space-y-3">
+<div class="flex justify-between items-end px-1">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Theme Presets</h3>
+<button class="text-xs font-medium text-primary">View All</button>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 snap-x">
+<!-- Theme Item 1 (Active) -->
+<div class="snap-start shrink-0 flex flex-col gap-2 w-24 cursor-pointer group">
+<div class="w-full aspect-square rounded-xl bg-[#1c2327] border-2 border-primary relative overflow-hidden">
+<img class="w-full h-full object-cover opacity-80" data-alt="Dark forest winter theme thumbnail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkGKOCb3_UHB95l5GAz6nTN0-S6l1bJij-YRiuDIOqW_36RTpJfv3iNPechtaZ30iCm5BO4LvgBrPnAE9ShFkbD4wN5OoO_Jf99NZTr63JLUwzB3DU8iZAEVr3fdRPwxrGeQdmZXqr9kMoPMgT2lmmdKoZdYrsFtLlch4UpWtFaVZJZPxx4sze__gq9kUKFL8EXv4ISIH-mMalX5CSdHb7s8sCqBF30tAmPO2QQCiH6NvgAi3eWJUr2l5Dkq69r11fNCvgLXLY6E-0"/>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-primary/90 text-white rounded-full p-1 shadow-sm">
+<span class="material-symbols-outlined text-sm font-bold">check</span>
+</div>
+</div>
+</div>
+<span class="text-xs font-medium text-center text-primary">Winter</span>
+</div>
+<!-- Theme Item 2 -->
+<div class="snap-start shrink-0 flex flex-col gap-2 w-24 cursor-pointer group">
+<div class="w-full aspect-square rounded-xl bg-slate-800 border-2 border-transparent group-hover:border-slate-600 overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600"></div>
+<div class="absolute bottom-2 left-2 text-white font-bold text-xs">Neon</div>
+</div>
+<span class="text-xs font-medium text-center text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">Vibrant</span>
+</div>
+<!-- Theme Item 3 -->
+<div class="snap-start shrink-0 flex flex-col gap-2 w-24 cursor-pointer group">
+<div class="w-full aspect-square rounded-xl bg-white border-2 border-transparent group-hover:border-slate-300 overflow-hidden relative">
+<div class="absolute inset-0 bg-[#f8f9fa] flex items-center justify-center">
+<span class="text-slate-900 font-bold text-lg">Aa</span>
+</div>
+</div>
+<span class="text-xs font-medium text-center text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">Minimal</span>
+</div>
+<!-- Theme Item 4 -->
+<div class="snap-start shrink-0 flex flex-col gap-2 w-24 cursor-pointer group">
+<div class="w-full aspect-square rounded-xl bg-orange-100 border-2 border-transparent group-hover:border-orange-300 overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-tr from-orange-400 to-amber-300"></div>
+</div>
+<span class="text-xs font-medium text-center text-slate-500 dark:text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200">Warm</span>
+</div>
+</div>
+</div>
+<!-- Section: Display Options -->
+<div class="space-y-3">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 pl-1">Display Options</h3>
+<div class="bg-white dark:bg-surface-dark rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5">
+<!-- Toggle Item -->
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Show Date</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">Display "Dec 25" below title</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer transition-all duration-300" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300" for="toggle1"></label>
+</div>
+</div>
+<!-- Toggle Item -->
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Show Units</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">Labels for days, hours, mins</span>
+</div>
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-primary appearance-none cursor-pointer transition-all duration-300 right-0 border-[#2badee]" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer transition-colors duration-300" for="toggle2"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Actions -->
+<footer class="fixed bottom-0 w-full p-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 z-30">
+<button class="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">add_circle</span>
+                Add Widget
+            </button>
+</footer>
+</div>
+</body></html>

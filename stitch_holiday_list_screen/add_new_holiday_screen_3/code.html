@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Add New Holiday Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#fb923c", // Warm Orange
+              "secondary": "#ec4899", // Lively Pink
+              "accent": "#facc15", // Vibrant Yellow
+              "relax-blue": "#e0f2fe", // Soft Blue (Sky-100)
+              "relax-green": "#dcfce7", // Gentle Green (Green-100)
+              "relax-green-dark": "#bbf7d0", // Green-200
+              "background-light": "#f0f9ff", // Sky-50
+              "text-main": "#334155", // Slate-700
+              "text-secondary": "#64748b", // Slate-500
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "3xl": "1.5rem", "full": "9999px"},
+            boxShadow: {
+              'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+              'glow': '0 0 20px rgba(251, 146, 60, 0.3)'
+            }
+          },
+        },
+      }
+    </script>
+<style>
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.mask-image-gradient { mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent); }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-gradient-to-br from-relax-blue via-white to-relax-green font-display text-text-main antialiased h-screen overflow-hidden selection:bg-secondary/30 selection:text-secondary">
+<div class="relative flex h-full w-full flex-col max-w-md mx-auto bg-white/40 backdrop-blur-xl shadow-2xl overflow-hidden">
+<header class="flex items-center justify-between px-6 py-5 bg-white/60 backdrop-blur-md sticky top-0 z-30 border-b border-white/50">
+<button class="text-text-secondary hover:text-sky-600 font-medium text-[16px] transition-colors active:scale-95">
+            Cancel
+        </button>
+<h2 class="text-slate-800 text-[18px] font-extrabold tracking-tight">
+            New Celebration ✨
+        </h2>
+<button class="bg-primary text-white px-6 py-2 rounded-full text-[15px] font-bold shadow-glow hover:bg-orange-500 active:scale-95 transition-all transform hover:-translate-y-0.5">
+            Add
+        </button>
+</header>
+<main class="flex-1 overflow-y-auto no-scrollbar pb-10">
+<div class="px-6 py-4 space-y-8">
+<div class="flex flex-col items-center justify-center space-y-6 mt-4">
+<button class="group relative h-36 w-36 rounded-full bg-white shadow-soft flex items-center justify-center transition-all hover:scale-105 active:scale-95 ring-8 ring-relax-green/40 hover:ring-relax-green/60">
+<span class="text-[5rem] group-hover:rotate-6 transition-transform duration-300 drop-shadow-sm select-none">🎉</span>
+<div class="absolute -bottom-2 -right-2 bg-secondary text-white h-11 w-11 rounded-full flex items-center justify-center shadow-lg border-4 border-white group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[20px] font-bold">edit</span>
+</div>
+</button>
+<div class="w-full text-center space-y-2">
+<input class="w-full bg-transparent border-none p-0 text-center text-[30px] font-black text-slate-800 placeholder:text-slate-300 focus:ring-0 leading-tight focus:placeholder:text-slate-200 transition-all" placeholder="Name your event" type="text" value="Mom's Birthday"/>
+<p class="text-secondary font-semibold text-[15px] bg-secondary/10 inline-block px-4 py-1 rounded-full">
+                        What are we looking forward to?
+                    </p>
+</div>
+</div>
+<div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-soft border border-white/60 overflow-hidden ring-1 ring-slate-100">
+<div class="px-5 py-4 flex items-center justify-between border-b border-slate-100 bg-gradient-to-r from-sky-50/50 to-green-50/50">
+<div class="flex items-center gap-3">
+<div class="h-11 w-11 rounded-2xl bg-relax-blue text-sky-600 flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined">calendar_month</span>
+</div>
+<div>
+<h3 class="text-slate-900 font-bold text-[16px]">When's the party?</h3>
+<p class="text-xs text-sky-500 font-semibold uppercase tracking-wide">Set the date</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<span class="text-sm font-semibold text-slate-400">All Day</span>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox" value=""/>
+<div class="w-12 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-accent shadow-inner transition-colors"></div>
+</label>
+</div>
+</div>
+<div class="relative bg-white py-2">
+<div class="w-full h-48 relative flex justify-center overflow-hidden mask-image-gradient">
+<div class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-12 bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50 rounded-lg pointer-events-none z-0 mx-4 border-y border-orange-100/60"></div>
+<div class="flex w-full justify-around z-10 text-center px-4">
+<div class="w-1/3 space-y-4 pt-[4.5rem] text-[18px]">
+<div class="text-slate-300 font-medium transform scale-90">October</div>
+<div class="text-primary font-bold transform scale-110 drop-shadow-sm">November</div>
+<div class="text-slate-300 font-medium transform scale-90">December</div>
+<div class="text-slate-300 font-medium transform scale-90 opacity-50">January</div>
+</div>
+<div class="w-1/3 space-y-4 pt-[4.5rem] text-[18px]">
+<div class="text-slate-300 font-medium transform scale-90">23</div>
+<div class="text-primary font-bold transform scale-110 drop-shadow-sm">24</div>
+<div class="text-slate-300 font-medium transform scale-90">25</div>
+<div class="text-slate-300 font-medium transform scale-90 opacity-50">26</div>
+</div>
+<div class="w-1/3 space-y-4 pt-[4.5rem] text-[18px]">
+<div class="text-slate-300 font-medium transform scale-90">2023</div>
+<div class="text-primary font-bold transform scale-110 drop-shadow-sm">2024</div>
+<div class="text-slate-300 font-medium transform scale-90">2025</div>
+<div class="text-slate-300 font-medium transform scale-90 opacity-50">2026</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="ml-2 text-sm font-bold text-secondary uppercase tracking-wider flex items-center gap-2 opacity-80">
+                   The Fun Details <span class="text-lg grayscale-0">🎡</span>
+</h3>
+<div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-soft border border-white/60 overflow-hidden ring-1 ring-slate-100">
+<div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-accent/20 text-yellow-600 flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all">
+<span class="material-symbols-outlined text-[22px]">update</span>
+</div>
+<span class="text-[16px] font-bold text-slate-800">Make it a tradition?</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[14px] text-primary font-bold bg-primary/10 px-3 py-1 rounded-full">Yearly</span>
+<span class="material-symbols-outlined text-slate-300 text-xl">chevron_right</span>
+</div>
+</div>
+<div class="h-px w-full bg-slate-100 ml-16"></div>
+<div class="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-slate-50 active:bg-slate-100 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-full bg-secondary/10 text-secondary flex items-center justify-center group-hover:scale-110 group-hover:-rotate-12 transition-all">
+<span class="material-symbols-outlined text-[22px]">notifications_active</span>
+</div>
+<span class="text-[16px] font-bold text-slate-800">Hype me up!</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[14px] text-slate-400 font-medium">On day of event</span>
+<span class="material-symbols-outlined text-slate-300 text-xl">chevron_right</span>
+</div>
+</div>
+</div>
+<div class="bg-white/80 backdrop-blur-sm rounded-3xl shadow-soft border border-white/60 overflow-hidden relative group focus-within:ring-2 focus-within:ring-secondary/30 transition-all ring-1 ring-slate-100">
+<div class="absolute top-4 left-5 text-secondary">
+<span class="material-symbols-outlined text-[24px]">edit_note</span>
+</div>
+<textarea class="w-full bg-transparent border-none py-4 pl-14 pr-5 text-[16px] text-slate-700 placeholder:text-slate-400 focus:ring-0 focus:outline-none min-h-[120px] resize-none leading-relaxed" placeholder="Any special plans or wishes? 📝"></textarea>
+</div>
+</div>
+<div class="px-4 pb-8 pt-2">
+<p class="text-[13px] text-slate-400 text-center leading-relaxed font-medium">
+                    Start the countdown and get ready to celebrate!<br/>
+<span class="text-sky-500 font-bold bg-sky-50 px-2 py-0.5 rounded-md mt-1 inline-block">Syncs with your calendar automatically</span>
+</p>
+</div>
+</div>
+</main>
+</div>
+
+</body></html>

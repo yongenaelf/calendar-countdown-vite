@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Widget Configuration</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2badee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                        "surface-dark": "#1c262c",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                },
+            },
+        }
+    </script>
+<style>.toggle-checkbox:checked {
+            right: 0;
+            border-color: #2badee;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #2badee;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden">
+<div class="relative flex h-full min-h-screen w-full flex-col">
+<header class="flex items-center justify-between px-4 py-4 bg-background-light dark:bg-background-dark z-10 shrink-0">
+<button class="text-slate-500 dark:text-slate-400 text-base font-medium active:text-primary transition-colors">
+                Cancel
+            </button>
+<h1 class="text-lg font-bold leading-tight tracking-[-0.015em]">Configure Widget</h1>
+<button class="size-8 flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">restart_alt</span>
+</button>
+</header>
+<main class="flex-1 overflow-y-auto overflow-x-hidden pb-32">
+<div class="flex flex-col items-center justify-center pt-6 pb-8 px-6 bg-gradient-to-b from-slate-50 to-white dark:from-[#152028] dark:to-[#0d161b]">
+<div class="flex items-center gap-2 mb-4">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+</span>
+<p class="text-xs font-semibold uppercase tracking-wider text-primary">Live Preview</p>
+</div>
+<div class="relative w-full max-w-[340px] aspect-[1.91/1] rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.4)] overflow-hidden group cursor-pointer ring-4 ring-white dark:ring-white/5 transition-all hover:scale-[1.02]">
+<div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD3QMVsxAz4_Sea_fevfiVEimn7ni3t9jhxLXFRtl8qjLNheugYq-WH_D5qsuuvqjenc5c4rKZdFSigcXqAMAVBYvJEj8eQpW5xW3WFzug4FEywcGx0SdJ1lgXOxMm1CpZE80zTf7qStg9Ac76GE9cYslSRoQt3hmHb1FsoEMvxJ56NUIwwkDY6uasX02-uz61urXG6y4VJg0ZnyrxZm8TS8As3T3QhIEE5fgyvQrCHab52K3UXHlF1yJhzs-lSWSj4QYhH85YmHkMw');">
+<div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20 mix-blend-multiply"></div>
+<div class="absolute inset-0 bg-black/10"></div>
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxjaXJjbGUgY3g9IjIiIGN5PSIyIiByPSIxIiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC41Ii8+PC9zdmc+')] opacity-30 animate-pulse-slow"></div>
+</div>
+<div class="absolute top-4 right-4 bg-white/20 backdrop-blur-md rounded-full p-1.5 shadow-sm border border-white/10">
+<span class="material-symbols-outlined text-white text-[16px] leading-none">weather_snowy</span>
+</div>
+<div class="relative h-full w-full p-6 flex flex-col justify-between text-white z-10">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-white/90 uppercase tracking-widest mb-1">Upcoming</span>
+<h3 class="text-2xl font-bold leading-none tracking-tight drop-shadow-lg">Christmas</h3>
+</div>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="text-6xl font-black tracking-tighter drop-shadow-xl font-display">12</span>
+<span class="text-lg font-medium text-white/90 drop-shadow-md pb-1">days left</span>
+</div>
+</div>
+</div>
+<div class="mt-8 w-full max-w-[340px]">
+<div class="flex h-10 w-full items-center justify-center rounded-xl bg-slate-200 dark:bg-[#1c262c] p-1">
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 text-slate-500 dark:text-slate-400 text-xs font-bold transition-all hover:text-slate-900 dark:hover:text-white">
+<span class="truncate">Small</span>
+<input class="invisible w-0 fixed" name="widget-size" type="radio" value="Small"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg bg-white dark:bg-surface-dark shadow-[0_1px_3px_0_rgba(0,0,0,0.1)] text-slate-900 dark:text-white text-xs font-bold transition-all">
+<span class="truncate">Medium</span>
+<input checked="" class="invisible w-0 fixed" name="widget-size" type="radio" value="Medium"/>
+</label>
+<label class="flex cursor-pointer h-full grow items-center justify-center rounded-lg px-2 text-slate-500 dark:text-slate-400 text-xs font-bold transition-all hover:text-slate-900 dark:hover:text-white">
+<span class="truncate">Large</span>
+<input class="invisible w-0 fixed" name="widget-size" type="radio" value="Large"/>
+</label>
+</div>
+</div>
+</div>
+<div class="sticky top-0 z-20 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-slate-200 dark:border-[#2a343a] px-4 shadow-sm">
+<div class="flex justify-between max-w-md mx-auto">
+<button class="flex flex-col items-center justify-center border-b-2 border-primary text-slate-900 dark:text-white pb-3 pt-4 flex-1 transition-colors">
+<span class="text-xs font-bold tracking-widest uppercase">Design</span>
+</button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-3 pt-4 flex-1 transition-colors">
+<span class="text-xs font-bold tracking-widest uppercase">Event</span>
+</button>
+<button class="flex flex-col items-center justify-center border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 pb-3 pt-4 flex-1 transition-colors">
+<span class="text-xs font-bold tracking-widest uppercase">Settings</span>
+</button>
+</div>
+</div>
+<div class="px-5 py-6 space-y-8 max-w-md mx-auto">
+<div class="space-y-3">
+<div class="flex justify-between items-end px-1">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Theme &amp; Atmosphere</h3>
+<button class="text-xs font-bold text-primary hover:text-primary/80 transition-colors">See All</button>
+</div>
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-5 px-5 snap-x">
+<div class="snap-start shrink-0 flex flex-col gap-2 w-28 cursor-pointer group">
+<div class="w-full aspect-[4/3] rounded-2xl bg-[#1c2327] border-[3px] border-primary relative overflow-hidden shadow-lg shadow-primary/10">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="Dark forest winter theme thumbnail" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAkGKOCb3_UHB95l5GAz6nTN0-S6l1bJij-YRiuDIOqW_36RTpJfv3iNPechtaZ30iCm5BO4LvgBrPnAE9ShFkbD4wN5OoO_Jf99NZTr63JLUwzB3DU8iZAEVr3fdRPwxrGeQdmZXqr9kMoPMgT2lmmdKoZdYrsFtLlch4UpWtFaVZJZPxx4sze__gq9kUKFL8EXv4ISIH-mMalX5CSdHb7s8sCqBF30tAmPO2QQCiH6NvgAi3eWJUr2l5Dkq69r11fNCvgLXLY6E-0"/>
+<div class="absolute inset-0 bg-black/20"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="bg-primary text-white rounded-full p-1.5 shadow-sm transform scale-100 transition-transform">
+<span class="material-symbols-outlined text-base font-bold">check</span>
+</div>
+</div>
+</div>
+<span class="text-xs font-bold text-center text-primary">Winter Wonderland</span>
+</div>
+<div class="snap-start shrink-0 flex flex-col gap-2 w-28 cursor-pointer group">
+<div class="w-full aspect-[4/3] rounded-2xl bg-slate-800 border-[3px] border-transparent group-hover:border-slate-300 dark:group-hover:border-slate-600 overflow-hidden relative shadow-sm">
+<div class="absolute inset-0 bg-gradient-to-br from-purple-500 via-fuchsia-500 to-pink-500"></div>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/50 text-4xl">celebration</span>
+</div>
+<div class="absolute bottom-2 left-2 right-2 text-white font-bold text-[10px] text-center bg-black/20 rounded-full py-0.5 backdrop-blur-sm">Neon Party</div>
+</div>
+<span class="text-xs font-medium text-center text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Neon Party</span>
+</div>
+<div class="snap-start shrink-0 flex flex-col gap-2 w-28 cursor-pointer group">
+<div class="w-full aspect-[4/3] rounded-2xl bg-slate-100 border-[3px] border-transparent group-hover:border-slate-300 dark:group-hover:border-slate-600 overflow-hidden relative shadow-sm">
+<div class="absolute inset-0 bg-[#f8f9fa] flex items-center justify-center">
+<span class="text-slate-400 font-black text-3xl tracking-tighter">Aa</span>
+</div>
+</div>
+<span class="text-xs font-medium text-center text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">Minimalist</span>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 pl-1">Customize Appearance</h3>
+<div class="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-white/5 space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Text Color</span>
+<div class="flex gap-2">
+<button class="size-8 rounded-full bg-white border-2 border-primary ring-2 ring-primary/20 shadow-sm transition-transform hover:scale-110"></button>
+<button class="size-8 rounded-full bg-rose-500 border-2 border-transparent hover:border-white/50 transition-transform hover:scale-110"></button>
+<button class="size-8 rounded-full bg-emerald-400 border-2 border-transparent hover:border-white/50 transition-transform hover:scale-110"></button>
+<button class="size-8 rounded-full bg-amber-400 border-2 border-transparent hover:border-white/50 transition-transform hover:scale-110"></button>
+<button class="size-8 rounded-full bg-gradient-to-tr from-blue-400 to-purple-500 border-2 border-transparent hover:border-white/50 transition-transform hover:scale-110"></button>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-2 px-1">
+<span class="material-symbols-outlined text-amber-500 text-lg">auto_awesome</span>
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Celebration Effects</h3>
+</div>
+<div class="grid grid-cols-4 gap-3">
+<button class="flex flex-col items-center gap-2 p-2 rounded-xl border-2 border-transparent hover:bg-slate-100 dark:hover:bg-white/5 transition-all group">
+<div class="size-12 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">block</span>
+</div>
+<span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">None</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-2 rounded-xl border-2 border-primary bg-primary/5 transition-all group relative">
+<div class="absolute top-1 right-1 size-2 bg-primary rounded-full"></div>
+<div class="size-12 rounded-full bg-sky-100 dark:bg-sky-500/20 flex items-center justify-center text-sky-500 dark:text-sky-400 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">weather_snowy</span>
+</div>
+<span class="text-[10px] font-bold text-slate-900 dark:text-white">Snow</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-2 rounded-xl border-2 border-transparent hover:bg-slate-100 dark:hover:bg-white/5 transition-all group">
+<div class="size-12 rounded-full bg-purple-100 dark:bg-purple-500/20 flex items-center justify-center text-purple-500 dark:text-purple-400 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">celebration</span>
+</div>
+<span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">Confetti</span>
+</button>
+<button class="flex flex-col items-center gap-2 p-2 rounded-xl border-2 border-transparent hover:bg-slate-100 dark:hover:bg-white/5 transition-all group">
+<div class="size-12 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center text-amber-500 dark:text-amber-400 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-2xl">flare</span>
+</div>
+<span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">Sparkle</span>
+</button>
+</div>
+</div>
+<div class="space-y-3 pb-8">
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 pl-1">Display Options</h3>
+<div class="bg-white dark:bg-surface-dark rounded-2xl overflow-hidden shadow-sm border border-slate-100 dark:border-white/5 divide-y divide-slate-100 dark:divide-white/5">
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Show Date</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">Display "Dec 25"</span>
+</div>
+<div class="relative inline-block w-11 mr-1 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-300 appearance-none cursor-pointer transition-all duration-300 top-0.5 left-0.5" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300" for="toggle1"></label>
+</div>
+</div>
+<div class="flex items-center justify-between p-4">
+<div class="flex flex-col">
+<span class="text-sm font-medium text-slate-900 dark:text-white">Show Units</span>
+<span class="text-xs text-slate-500 dark:text-slate-400">Day/Hour labels</span>
+</div>
+<div class="relative inline-block w-11 mr-1 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-primary appearance-none cursor-pointer transition-all duration-300 right-0.5 top-0.5 border-[#2badee]" id="toggle2" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-primary cursor-pointer transition-colors duration-300" for="toggle2"></label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<footer class="fixed bottom-0 w-full p-4 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10 z-30">
+<button class="w-full bg-gradient-to-r from-primary to-sky-400 hover:from-primary/90 hover:to-sky-400/90 text-white font-bold h-14 rounded-2xl shadow-lg shadow-primary/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-lg">
+<span class="material-symbols-outlined">add_circle</span>
+                Add Widget
+            </button>
+</footer>
+</div>
+
+</body></html>

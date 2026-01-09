@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Holiday List Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        "joy-yellow": "#FACC15",
+                        "joy-orange": "#FB923C",
+                        "joy-pink": "#F472B6",
+                        "joy-pink-dark": "#EC4899",
+                        "relax-blue": "#E0F2FE", // Sky 100
+                        "relax-green": "#DCFCE7", // Emerald 100
+                        "relax-blue-dark": "#BAE6FD", // Sky 200
+                        "relax-green-dark": "#BBF7D0", // Emerald 200
+                        "background-light": "#F8FAFC", 
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "3xl": "2rem",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'card': '0 10px 30px -5px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        }
+    </script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+        }
+        .bg-pattern {
+            background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light font-display antialiased text-slate-900 transition-colors duration-200">
+<div class="relative flex h-full min-h-screen w-full flex-col max-w-md mx-auto overflow-hidden bg-white shadow-2xl border-x border-slate-100">
+<div class="absolute inset-0 bg-pattern opacity-30 pointer-events-none"></div>
+<header class="sticky top-0 z-20 flex items-center justify-between px-6 py-6 bg-white/90 backdrop-blur-xl border-b border-slate-100/50">
+<div>
+<h1 class="text-3xl font-extrabold tracking-tight text-slate-900">Events <span class="text-joy-orange drop-shadow-sm inline-block animate-pulse">🎉</span></h1>
+<p class="text-sm font-medium text-slate-500 mt-1">Make every day count!</p>
+</div>
+<button class="flex items-center justify-center w-11 h-11 rounded-full bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 hover:scale-105 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+</button>
+</header>
+<main class="flex-1 overflow-y-auto pb-32 no-scrollbar relative z-10">
+<div class="px-6 py-4">
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
+<button class="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 rounded-full font-semibold text-sm border border-slate-200 shadow-soft active:scale-95 transition-all whitespace-nowrap hover:border-joy-pink/50">
+<span class="material-symbols-outlined text-joy-pink text-[20px]">calendar_add_on</span>
+                        Import
+                    </button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 rounded-full font-semibold text-sm border border-slate-200 shadow-soft active:scale-95 transition-all whitespace-nowrap hover:border-joy-orange/50">
+<span class="material-symbols-outlined text-joy-orange text-[20px]">public</span>
+                        Public
+                    </button>
+<button class="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-700 rounded-full font-semibold text-sm border border-slate-200 shadow-soft active:scale-95 transition-all whitespace-nowrap hover:border-joy-yellow/50">
+<span class="material-symbols-outlined text-yellow-500 text-[20px]">widgets</span>
+                        Widget
+                    </button>
+</div>
+</div>
+<div class="flex flex-col gap-6 px-6 pt-2">
+<div class="group relative overflow-hidden rounded-3xl bg-relax-green border border-green-200 shadow-card transform transition-all hover:scale-[1.02] active:scale-[0.98]">
+<div class="absolute -right-12 -top-12 w-48 h-48 bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative p-6">
+<div class="flex justify-between items-start mb-6">
+<div>
+<div class="inline-flex items-center justify-center px-3 py-1 bg-white text-joy-pink shadow-sm rounded-full text-xs font-bold mb-3 border border-pink-100">
+<span class="material-symbols-outlined text-[14px] mr-1">celebration</span> Upcoming
+                                </div>
+<h2 class="text-2xl font-black text-slate-800 tracking-tight">Christmas</h2>
+<p class="text-emerald-700 font-medium text-sm mt-0.5 opacity-80">December 25, 2024</p>
+</div>
+<div class="w-14 h-14 flex items-center justify-center bg-white rounded-2xl shadow-sm border border-green-100 text-emerald-500 rotate-3 group-hover:rotate-6 transition-transform">
+<span class="material-symbols-outlined text-[32px]">forest</span>
+</div>
+</div>
+<div class="flex items-baseline gap-2 mb-4">
+<span class="text-7xl font-black tracking-tighter text-joy-pink drop-shadow-sm">14</span>
+<span class="text-xl font-bold text-slate-500 mb-2">days left</span>
+</div>
+<div class="flex gap-2 p-4 bg-white/70 rounded-2xl backdrop-blur-sm border border-white/50 shadow-sm mt-2">
+<div class="flex-1 flex flex-col items-center">
+<span class="text-xl font-bold font-mono leading-none text-slate-800">10</span>
+<span class="text-[10px] uppercase text-slate-500 font-bold mt-1">Hrs</span>
+</div>
+<div class="w-px bg-slate-200 h-8 self-center"></div>
+<div class="flex-1 flex flex-col items-center">
+<span class="text-xl font-bold font-mono leading-none text-slate-800">35</span>
+<span class="text-[10px] uppercase text-slate-500 font-bold mt-1">Mins</span>
+</div>
+<div class="w-px bg-slate-200 h-8 self-center"></div>
+<div class="flex-1 flex flex-col items-center relative">
+<span class="text-xl font-bold font-mono leading-none text-joy-orange">12</span>
+<span class="text-[10px] uppercase text-slate-500 font-bold mt-1">Secs</span>
+</div>
+</div>
+</div>
+<div class="h-2 w-full bg-white/50">
+<div class="h-full bg-gradient-to-r from-joy-pink to-joy-orange w-[85%] rounded-r-full shadow-[0_0_15px_rgba(244,114,182,0.6)]"></div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-3xl bg-relax-blue border border-sky-200 shadow-card transform transition-all hover:scale-[1.02] active:scale-[0.98]">
+<div class="absolute -left-10 -bottom-10 w-48 h-48 bg-white/40 rounded-full blur-3xl pointer-events-none"></div>
+<div class="relative p-6">
+<div class="flex items-center gap-5 mb-5">
+<div class="w-14 h-14 flex shrink-0 items-center justify-center bg-white rounded-2xl shadow-sm border border-sky-100 text-sky-500 group-hover:-translate-y-1 transition-transform">
+<span class="material-symbols-outlined text-[28px]">flight_takeoff</span>
+</div>
+<div>
+<h3 class="text-xl font-bold leading-tight text-slate-800">Trip to Bali</h3>
+<p class="text-sky-700 text-sm font-medium mt-1 opacity-80">Jan 15, 2025 • 10:00 AM</p>
+</div>
+</div>
+<div class="flex items-center justify-between bg-white/60 p-4 rounded-2xl border border-white/50 shadow-sm">
+<div class="flex items-baseline gap-2">
+<span class="text-4xl font-black text-joy-orange drop-shadow-sm">35</span>
+<span class="text-sm font-bold text-slate-500 uppercase tracking-wide">days to go</span>
+</div>
+<div class="px-3 py-1.5 bg-white rounded-lg text-xs font-bold text-sky-600 shadow-sm border border-sky-100">
+                                Flight AA-102
+                            </div>
+</div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-3xl bg-indigo-50 border border-indigo-100 shadow-card transform transition-all hover:scale-[1.02] active:scale-[0.98]">
+<div class="absolute right-0 top-0 w-32 h-32 bg-indigo-200/30 rounded-full blur-2xl pointer-events-none"></div>
+<div class="relative p-5 flex items-center justify-between">
+<div class="flex flex-col z-10">
+<span class="inline-block w-fit px-2 py-0.5 rounded text-[10px] font-bold bg-joy-yellow/30 text-yellow-700 mb-2 uppercase tracking-wider border border-yellow-200">Celebration</span>
+<h3 class="text-xl font-bold text-slate-800">New Year's Eve</h3>
+<p class="text-indigo-600/80 text-sm mt-1 font-medium">Dec 31, 2024</p>
+</div>
+<div class="flex flex-col items-end z-10">
+<div class="text-center bg-white rounded-xl p-3 min-w-[76px] border border-indigo-100 shadow-sm">
+<span class="block text-3xl font-black leading-none text-joy-yellow drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]">20</span>
+<span class="text-[10px] uppercase font-bold text-slate-400 mt-1 block">Days</span>
+</div>
+</div>
+</div>
+<div class="absolute bottom-0 w-full flex">
+<div class="h-1 bg-joy-yellow w-1/3"></div>
+<div class="h-1 bg-joy-orange w-1/3"></div>
+<div class="h-1 bg-joy-pink w-1/3"></div>
+</div>
+</div>
+<div class="group relative overflow-hidden rounded-3xl bg-teal-50 border border-teal-100 shadow-sm transform transition-all hover:scale-[1.02] active:scale-[0.98]">
+<div class="relative p-5 flex items-center gap-4">
+<div class="w-12 h-12 flex shrink-0 items-center justify-center bg-white text-joy-pink rounded-2xl border border-teal-100 shadow-sm">
+<span class="material-symbols-outlined text-[24px]">cake</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-bold text-slate-900">Mom's Birthday</h3>
+<p class="text-teal-600 text-xs font-bold mt-1 uppercase tracking-wide">Feb 20, 2025</p>
+</div>
+<div class="text-right flex items-center gap-2 bg-white/60 px-3 py-2 rounded-xl border border-white/60">
+<span class="block text-2xl font-black text-joy-pink leading-none">71</span>
+<span class="text-[10px] text-slate-400 uppercase font-bold">Days</span>
+</div>
+</div>
+</div>
+<div class="h-12"></div>
+</div>
+</main>
+<div class="absolute bottom-8 right-6 z-30">
+<button class="group flex items-center justify-center w-16 h-16 bg-joy-pink text-white rounded-full shadow-[0_8px_30px_rgba(244,114,182,0.5)] hover:bg-joy-pink-dark hover:scale-110 hover:rotate-90 transition-all duration-300 border-4 border-white/20">
+<span class="material-symbols-outlined text-[36px]">add</span>
+</button>
+</div>
+<div class="absolute bottom-0 w-full h-1 bg-transparent pointer-events-none z-40">
+<div class="mx-auto w-1/3 h-1.5 bg-slate-300 rounded-full mb-2"></div>
+</div>
+</div>
+
+</body></html>

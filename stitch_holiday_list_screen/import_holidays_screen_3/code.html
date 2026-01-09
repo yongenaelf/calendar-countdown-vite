@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Import Holidays</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2badee",
+                        "primary-dark": "#1fa0e0",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101c22",
+                        "card-light": "#ffffff",
+                        "card-dark": "#18262d",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem", 
+                        "lg": "0.5rem", 
+                        "xl": "0.75rem", 
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { min-height: max(884px, 100dvh); }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased min-h-screen flex flex-col">
+<header class="sticky top-0 z-10 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800 transition-colors">
+<div class="flex items-center justify-between px-4 py-3">
+<button class="flex items-center justify-center p-2 -ml-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
+<span class="material-symbols-outlined text-gray-600 dark:text-gray-300 group-hover:text-primary transition-colors">arrow_back_ios_new</span>
+</button>
+<h1 class="text-lg font-bold tracking-tight text-center flex-1 mr-8">Import Holidays</h1>
+</div>
+</header>
+<main class="flex-1 w-full max-w-md mx-auto px-4 py-6 space-y-8">
+<div class="text-center px-4 mb-2">
+<div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/30 mb-4 text-primary shadow-sm">
+<span class="material-symbols-outlined text-3xl">celebration</span>
+</div>
+<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-1">Get the Party Started!</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400">Import your holidays to fill up your countdown calendar instantly.</p>
+</div>
+<div>
+<h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 ml-4">Sync Accounts</h3>
+<div class="bg-card-light dark:bg-card-dark rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center gap-4 px-5 py-4 justify-between border-b border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-2xl bg-gray-100 dark:bg-[#283339] shrink-0 w-12 h-12">
+<span class="material-symbols-outlined text-gray-900 dark:text-white">calendar_month</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-base font-semibold leading-normal line-clamp-1">iOS Calendar</p>
+<p class="text-gray-500 dark:text-[#9db0b9] text-sm font-normal leading-normal line-clamp-1">Local Apple calendars</p>
+</div>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-[#283339] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors">
+<div class="h-[27px] w-[27px] rounded-full bg-white shadow-sm"></div>
+<input checked="" class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+<div class="flex items-center gap-4 px-5 py-4 justify-between border-b border-gray-100 dark:border-gray-800">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/20 shrink-0 w-12 h-12">
+<span class="material-symbols-outlined text-blue-600 dark:text-blue-400">event</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-base font-semibold leading-normal line-clamp-1">Google Calendar</p>
+<p class="text-gray-500 dark:text-[#9db0b9] text-sm font-normal leading-normal line-clamp-1">Sync Google events</p>
+</div>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-[#283339] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors">
+<div class="h-[27px] w-[27px] rounded-full bg-white shadow-sm"></div>
+<input class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+<div class="flex items-center gap-4 px-5 py-4 justify-between">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-2xl bg-green-50 dark:bg-green-900/20 shrink-0 w-12 h-12">
+<span class="material-symbols-outlined text-green-600 dark:text-green-400">android</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-base font-semibold leading-normal line-clamp-1">Android Calendar</p>
+<p class="text-gray-500 dark:text-[#9db0b9] text-sm font-normal leading-normal line-clamp-1">From connected device</p>
+</div>
+</div>
+<div class="shrink-0">
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-gray-300 dark:bg-[#283339] p-0.5 has-[:checked]:justify-end has-[:checked]:bg-primary transition-colors">
+<div class="h-[27px] w-[27px] rounded-full bg-white shadow-sm"></div>
+<input class="invisible absolute" type="checkbox"/>
+</label>
+</div>
+</div>
+</div>
+<p class="mt-3 ml-4 text-xs text-gray-500 dark:text-gray-400 font-medium">Auto-syncs daily for fresh countdowns.</p>
+</div>
+<div>
+<h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 ml-4">Import Files</h3>
+<div class="bg-card-light dark:bg-card-dark rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800/50">
+<button class="w-full text-left flex items-center gap-4 px-5 py-4 justify-between border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 shrink-0 w-12 h-12">
+<span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">upload_file</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-base font-semibold leading-normal line-clamp-1 group-hover:text-primary transition-colors">Upload .ICS File</p>
+<p class="text-gray-500 dark:text-[#9db0b9] text-sm font-normal leading-normal line-clamp-1">Standard iCal format</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600">chevron_right</span>
+</button>
+<button class="w-full text-left flex items-center gap-4 px-5 py-4 justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 shrink-0 w-12 h-12">
+<span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400">table_view</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-base font-semibold leading-normal line-clamp-1 group-hover:text-primary transition-colors">Upload .CSV File</p>
+<p class="text-gray-500 dark:text-[#9db0b9] text-sm font-normal leading-normal line-clamp-1">Spreadsheet data</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600">chevron_right</span>
+</button>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 ml-4">Quick Add</h3>
+<div class="bg-card-light dark:bg-card-dark rounded-3xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-800/50">
+<button class="w-full text-left flex items-center gap-4 px-5 py-4 justify-between hover:bg-gray-50 dark:hover:bg-white/5 transition-colors group">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center rounded-2xl bg-orange-100 dark:bg-orange-500/20 shrink-0 w-12 h-12">
+<span class="material-symbols-outlined text-orange-600 dark:text-orange-400">public</span>
+</div>
+<div class="flex flex-col justify-center">
+<p class="text-base font-semibold leading-normal line-clamp-1 group-hover:text-primary transition-colors">Holiday Library</p>
+<p class="text-gray-500 dark:text-[#9db0b9] text-sm font-normal leading-normal line-clamp-1">By country or religion</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-300 dark:text-gray-600">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center mt-4 px-8 text-center space-y-2 pb-8 opacity-70">
+<span class="material-symbols-outlined text-2xl text-gray-400 dark:text-gray-600">verified_user</span>
+<p class="text-xs text-gray-400 dark:text-gray-500 leading-relaxed max-w-xs mx-auto">
+            Your privacy matters. All imports are processed securely on your device.
+        </p>
+</div>
+</main>
+
+</body></html>
