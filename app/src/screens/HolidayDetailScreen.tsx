@@ -76,13 +76,12 @@ export function HolidayDetailScreen() {
                 { value: countdown.seconds, label: 'Secs' },
               ].map((item, i) => (
                 <div key={i} className="flex flex-1 flex-col items-center gap-2">
-                  <div className="flex h-20 w-full items-center justify-center rounded-2xl bg-surface-dark/80 backdrop-blur-md border border-white/5 shadow-lg relative overflow-hidden">
-                    {i === 3 && <div className="absolute inset-0 bg-primary/5"></div>}
-                    <span className="text-primary text-3xl font-black tracking-tight tabular-nums relative z-10">
+                  <div className={`flex h-20 w-full items-center justify-center rounded-2xl bg-surface-dark/80 backdrop-blur-md border border-white/5 shadow-lg relative overflow-hidden ${i === 3 ? 'bg-primary/10' : ''}`}>
+                    <span className={`text-3xl font-black tracking-tight tabular-nums relative z-10 ${i === 3 ? 'text-primary' : 'text-white'}`}>
                       {item.value.toString().padStart(2, '0')}
                     </span>
                   </div>
-                  <span className="text-slate-400 text-xs font-medium uppercase tracking-wider">{item.label}</span>
+                  <span className={`text-xs font-medium uppercase tracking-wider ${i === 3 ? 'text-primary' : 'text-slate-400'}`}>{item.label}</span>
                 </div>
               ))}
             </div>

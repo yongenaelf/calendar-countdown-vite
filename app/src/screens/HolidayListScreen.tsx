@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer, IconButton, HolidayCard } from '../components';
+import { useTheme } from '../context';
 import type { Holiday } from '../types/holiday';
 
 // Sample data
@@ -39,20 +40,21 @@ const holidays: Holiday[] = [
     date: new Date('2026-02-20'),
     icon: 'cake',
     category: 'birthday',
-    color: 'teal',
+    color: 'pink',
     recurrence: 'yearly',
   },
 ];
 
 export function HolidayListScreen() {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen">
       <MobileContainer>
-        {/* Background pattern */}
+        {/* Background pattern - light mode only */}
         <div 
-          className="absolute inset-0 opacity-40 pointer-events-none"
+          className="absolute inset-0 opacity-40 dark:opacity-0 pointer-events-none"
           style={{
             backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)',
             backgroundSize: '20px 20px',
@@ -60,47 +62,43 @@ export function HolidayListScreen() {
         />
         
         {/* Header */}
-        <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-5 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-xl border-b border-transparent">
+        <header className="sticky top-0 z-20 flex items-center justify-between px-6 py-5 bg-background-light/80 dark:bg-background-dark/90 backdrop-blur-xl border-b border-transparent dark:border-white/5">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Events <span className="text-joy-yellow drop-shadow-sm">🎉</span>
+              My Holidays
             </h1>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">Make every day count!</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-500 mt-1">{holidays.length} upcoming events</p>
           </div>
-          <IconButton icon="settings" onClick={() => {}} />
+          <IconButton 
+            icon={theme === 'dark' ? 'light_mode' : 'dark_mode'} 
+            onClick={toggleTheme} 
+          />
         </header>
         
         {/* Main content */}
         <main className="flex-1 overflow-y-auto pb-32 no-scrollbar relative z-10">
           {/* Quick actions */}
-          <div className="px-6 py-2">
+          <div className="px-6 py-3">
             <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
               <button 
                 onClick={() => navigate('/import')}
-                className="flex items-center gap-2 px-4 py-2 bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-300 rounded-full font-semibold text-sm border border-sky-100 dark:border-sky-500/20 active:scale-95 transition-transform whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2.5 bg-sky-50 dark:bg-surface-dark text-sky-600 dark:text-primary rounded-full font-semibold text-sm border border-sky-100 dark:border-white/10 active:scale-95 transition-transform whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
-                Import
+                Import Calendar
               </button>
               <button 
                 onClick={() => navigate('/browse')}
-                className="flex items-center gap-2 px-4 py-2 bg-teal-50 dark:bg-teal-500/10 text-teal-600 dark:text-teal-300 rounded-full font-semibold text-sm border border-teal-100 dark:border-teal-500/20 active:scale-95 transition-transform whitespace-nowrap"
+                className="flex items-center gap-2 px-4 py-2.5 bg-teal-50 dark:bg-surface-dark text-teal-600 dark:text-slate-300 rounded-full font-semibold text-sm border border-teal-100 dark:border-white/10 active:scale-95 transition-transform whitespace-nowrap"
               >
                 <span className="material-symbols-outlined text-[18px]">public</span>
-                Public
-              </button>
-              <button 
-                onClick={() => navigate('/widget')}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-300 rounded-full font-semibold text-sm border border-indigo-100 dark:border-indigo-500/20 active:scale-95 transition-transform whitespace-nowrap"
-              >
-                <span className="material-symbols-outlined text-[18px]">widgets</span>
-                Widget
+                Public Holidays
               </button>
             </div>
           </div>
           
           {/* Holiday cards */}
-          <div className="flex flex-col gap-5 px-6 pt-4">
+          <div className="flex flex-col gap-4 px-6 pt-2">
             {holidays.map((holiday, index) => (
               <HolidayCard 
                 key={holiday.id} 
@@ -117,7 +115,7 @@ export function HolidayListScreen() {
         <div className="absolute bottom-8 right-6 z-30">
           <button 
             onClick={() => navigate('/add')}
-            className="group flex items-center justify-center w-16 h-16 bg-joy-pink hover:bg-joy-pink-dark text-white rounded-full shadow-xl shadow-pink-500/30 hover:scale-110 hover:-rotate-90 transition-all duration-300"
+            className="group flex items-center justify-center w-16 h-16 bg-primary dark:bg-primary hover:bg-primary-light text-white rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-200"
           >
             <span className="material-symbols-outlined text-[32px]">add</span>
           </button>

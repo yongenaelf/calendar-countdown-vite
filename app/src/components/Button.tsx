@@ -28,10 +28,10 @@ export function Button({
   };
 
   const variantStyles = {
-    primary: 'bg-gradient-to-r from-joy-orange to-joy-pink hover:from-orange-500 hover:to-pink-500 text-white shadow-lg shadow-orange-200',
-    secondary: 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50',
-    danger: 'bg-red-500/10 text-red-500 hover:bg-red-500/20',
-    text: 'bg-transparent text-slate-500 hover:text-slate-700',
+    primary: 'bg-primary hover:bg-primary-light text-slate-900 shadow-lg shadow-primary/20 dark:shadow-primary/10',
+    secondary: 'bg-white dark:bg-surface-dark border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-surface-dark-elevated',
+    danger: 'bg-red-500/10 dark:bg-red-500/20 text-red-500 hover:bg-red-500/20 dark:hover:bg-red-500/30',
+    text: 'bg-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
   };
 
   return (
