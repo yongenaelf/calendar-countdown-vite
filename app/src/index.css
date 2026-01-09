@@ -4,6 +4,9 @@
 
 @import "tailwindcss";
 
+/* Enable dark mode with .dark class selector (Tailwind CSS v4) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Custom theme configuration */
 @theme {
   /* Joy colors - vibrant and playful */
