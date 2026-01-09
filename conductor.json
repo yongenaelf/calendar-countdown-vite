@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "setup": "cd app && pnpm i",
+    "run": "cd app && pnpm i && pnpm dev"
+  }
+}
