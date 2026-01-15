@@ -245,9 +245,6 @@ const REMINDER_OPTIONS = [
 
 type ReminderOption = typeof REMINDER_OPTIONS[number]['value'];
 
-// Icon options for celebrations
-const ICON_OPTIONS = ['🎉', '🎂', '🎄', '✈️', '💍', '🎓', '🏆', '❤️', '🌟', '🎁'];
-
 // Color options
 const COLOR_OPTIONS: Array<'emerald' | 'sky' | 'indigo' | 'teal' | 'pink' | 'orange'> = [
   'pink', 'orange', 'emerald', 'sky', 'indigo', 'teal'
@@ -272,7 +269,7 @@ export function AddHolidayScreen() {
   const { addHoliday } = useHolidays();
   
   const [name, setName] = useState('');
-  const [selectedEmoji, setSelectedEmoji] = useState('🎉');
+  const [selectedEmoji] = useState('🎉');
   const [allDay, setAllDay] = useState(true);
   const [repeatOption, setRepeatOption] = useState<RepeatOption>('yearly');
   const [showRepeatSheet, setShowRepeatSheet] = useState(false);
@@ -294,12 +291,8 @@ export function AddHolidayScreen() {
   const daysInMonth = getDaysInMonth(selectedMonth, parseInt(years[selectedYear]));
   const days = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
   
-  // Adjust day if it exceeds days in month
-  useEffect(() => {
-    if (selectedDay >= daysInMonth) {
-      setSelectedDay(daysInMonth - 1);
-    }
-  }, [selectedMonth, selectedYear, daysInMonth, selectedDay]);
+  // Clamp selected day to valid range
+  const clampedSelectedDay = Math.min(selectedDay, daysInMonth - 1);
 
   // Map repeat option to recurrence type
   const getRecurrence = (): 'none' | 'yearly' | 'monthly' | 'weekly' => {
@@ -316,7 +309,7 @@ export function AddHolidayScreen() {
 
     const year = parseInt(years[selectedYear]);
     const month = selectedMonth;
-    const day = selectedDay + 1; // Convert from 0-indexed to 1-indexed
+    const day = clampedSelectedDay + 1; // Convert from 0-indexed to 1-indexed
     const date = new Date(year, month, day);
 
     addHoliday({
@@ -420,7 +413,7 @@ export function AddHolidayScreen() {
                   <div className="w-1/3">
                     <PickerWheel
                       items={days}
-                      selectedIndex={selectedDay}
+                      selectedIndex={clampedSelectedDay}
                       onChange={setSelectedDay}
                     />
                   </div>

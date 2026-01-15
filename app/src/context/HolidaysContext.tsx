@@ -123,6 +123,7 @@ export function HolidaysProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useHolidays() {
   const context = useContext(HolidaysContext);
   if (context === undefined) {

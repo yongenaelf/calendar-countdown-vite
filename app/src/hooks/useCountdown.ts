@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { CountdownTime } from '../types/holiday';
 
 export function useCountdown(targetDate: Date): CountdownTime {
-  const calculateTimeLeft = (): CountdownTime => {
+  const calculateTimeLeft = useCallback((): CountdownTime => {
     const difference = targetDate.getTime() - new Date().getTime();
     
     if (difference <= 0) {
@@ -15,7 +15,7 @@ export function useCountdown(targetDate: Date): CountdownTime {
       minutes: Math.floor((difference / 1000 / 60) % 60),
       seconds: Math.floor((difference / 1000) % 60),
     };
-  };
+  }, [targetDate]);
 
   const [timeLeft, setTimeLeft] = useState<CountdownTime>(calculateTimeLeft());
 
@@ -25,7 +25,7 @@ export function useCountdown(targetDate: Date): CountdownTime {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [targetDate]);
+  }, [calculateTimeLeft]);
 
   return timeLeft;
 }

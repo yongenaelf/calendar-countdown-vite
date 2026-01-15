@@ -98,6 +98,14 @@ export function HolidayDetailScreen() {
   
   const holiday = getHoliday(id || '');
   
+  // Calculate effective date - use fallback for when holiday is not found
+  const effectiveDate = holiday 
+    ? getNextOccurrence(holiday.date, holiday.recurrence) 
+    : new Date();
+  
+  // Always call hooks unconditionally
+  const countdown = useCountdown(effectiveDate);
+  
   const handleDelete = () => {
     if (id) {
       deleteHoliday(id);
@@ -123,9 +131,6 @@ export function HolidayDetailScreen() {
       </div>
     );
   }
-  
-  const effectiveDate = getNextOccurrence(holiday.date, holiday.recurrence);
-  const countdown = useCountdown(effectiveDate);
   const { progress, lastDate, nextDate } = calculateProgress(holiday.date, holiday.recurrence);
   const image = categoryImages[holiday.category] || categoryImages.custom;
 
