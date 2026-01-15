@@ -1,24 +1,81 @@
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer, IconButton, HolidayCard } from '../components';
 import { useTheme, useHolidays } from '../context';
+import type { Holiday } from '../types/holiday';
+
+// Calculate the next occurrence of a recurring event
+function getNextOccurrence(date: Date, recurrence: Holiday['recurrence']): Date {
+  const now = new Date();
+  const eventDate = new Date(date);
+  
+  // If the event is in the future, return the original date
+  if (eventDate > now) {
+    return eventDate;
+  }
+  
+  // If no recurrence or 'none', return the original date (will be filtered out later)
+  if (!recurrence || recurrence === 'none') {
+    return eventDate;
+  }
+  
+  const nextDate = new Date(eventDate);
+  
+  switch (recurrence) {
+    case 'yearly':
+      // Keep incrementing year until we're in the future
+      while (nextDate <= now) {
+        nextDate.setFullYear(nextDate.getFullYear() + 1);
+      }
+      break;
+    case 'monthly':
+      // Keep incrementing month until we're in the future
+      while (nextDate <= now) {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+      break;
+    case 'weekly':
+      // Keep incrementing week until we're in the future
+      while (nextDate <= now) {
+        nextDate.setDate(nextDate.getDate() + 7);
+      }
+      break;
+  }
+  
+  return nextDate;
+}
+
+// Check if an event should be shown (not a past one-time event)
+function shouldShowHoliday(holiday: Holiday): boolean {
+  const now = new Date();
+  const eventDate = new Date(holiday.date);
+  
+  // If event is in the future, always show
+  if (eventDate > now) {
+    return true;
+  }
+  
+  // If event is in the past and has no recurrence, hide it
+  if (!holiday.recurrence || holiday.recurrence === 'none') {
+    return false;
+  }
+  
+  // Recurring events are always shown (with next occurrence)
+  return true;
+}
 
 export function HolidayListScreen() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { holidays } = useHolidays();
   
-  // Sort holidays by date (upcoming first)
-  const sortedHolidays = [...holidays].sort((a, b) => {
-    const now = new Date();
-    const dateA = new Date(a.date);
-    const dateB = new Date(b.date);
-    // Put past dates at the end
-    const aIsPast = dateA < now;
-    const bIsPast = dateB < now;
-    if (aIsPast && !bIsPast) return 1;
-    if (!aIsPast && bIsPast) return -1;
-    return dateA.getTime() - dateB.getTime();
-  });
+  // Filter out past one-time events and sort by next occurrence date
+  const visibleHolidays = holidays
+    .filter(shouldShowHoliday)
+    .map(holiday => ({
+      ...holiday,
+      effectiveDate: getNextOccurrence(holiday.date, holiday.recurrence),
+    }))
+    .sort((a, b) => a.effectiveDate.getTime() - b.effectiveDate.getTime());
 
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen">
@@ -38,7 +95,7 @@ export function HolidayListScreen() {
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               My Holidays
             </h1>
-            <p className="text-sm font-medium text-slate-500 dark:text-slate-500 mt-1">{holidays.length} upcoming events</p>
+            <p className="text-sm font-medium text-slate-500 dark:text-slate-500 mt-1">{visibleHolidays.length} upcoming events</p>
           </div>
           <IconButton 
             icon={theme === 'dark' ? 'light_mode' : 'dark_mode'} 
@@ -70,11 +127,12 @@ export function HolidayListScreen() {
           
           {/* Holiday cards */}
           <div className="flex flex-col gap-4 px-6 pt-2">
-            {sortedHolidays.map((holiday, index) => (
+            {visibleHolidays.map((holiday, index) => (
               <HolidayCard 
                 key={holiday.id} 
-                holiday={holiday} 
-                variant={index === 0 ? 'featured' : index === sortedHolidays.length - 1 ? 'compact' : 'standard'}
+                holiday={holiday}
+                effectiveDate={holiday.effectiveDate}
+                variant={index === 0 ? 'featured' : index === visibleHolidays.length - 1 ? 'compact' : 'standard'}
               />
             ))}
           </div>

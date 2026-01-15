@@ -4,6 +4,7 @@ import type { Holiday } from '../types/holiday';
 
 interface HolidayCardProps {
   holiday: Holiday;
+  effectiveDate?: Date; // The next occurrence date for recurring events
   variant?: 'featured' | 'standard' | 'compact';
 }
 
@@ -74,9 +75,11 @@ function formatDate(date: Date): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function HolidayCard({ holiday, variant = 'standard' }: HolidayCardProps) {
+export function HolidayCard({ holiday, effectiveDate, variant = 'standard' }: HolidayCardProps) {
   const navigate = useNavigate();
-  const countdown = useCountdown(holiday.date);
+  // Use effectiveDate for countdown if provided, otherwise use the holiday's date
+  const displayDate = effectiveDate || holiday.date;
+  const countdown = useCountdown(displayDate);
   const colors = colorStyles[holiday.color];
 
   const handleClick = () => {
@@ -97,7 +100,7 @@ export function HolidayCard({ holiday, variant = 'standard' }: HolidayCardProps)
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-bold text-slate-800 dark:text-white">{holiday.name}</h2>
-              <p className={`${colors.dateText} font-medium text-sm`}>{formatDate(holiday.date)}</p>
+              <p className={`${colors.dateText} font-medium text-sm`}>{formatDate(displayDate)}</p>
             </div>
             <div className={`${colors.badge} px-3 py-1.5 rounded-lg text-sm font-bold`}>
               {countdown.days} Days
@@ -132,7 +135,7 @@ export function HolidayCard({ holiday, variant = 'standard' }: HolidayCardProps)
           </div>
           <div className="flex-1">
             <h3 className="text-base font-bold text-slate-900 dark:text-white">{holiday.name}</h3>
-            <p className={`${colors.dateText} text-xs mt-0.5`}>{formatDate(holiday.date)}</p>
+            <p className={`${colors.dateText} text-xs mt-0.5`}>{formatDate(displayDate)}</p>
           </div>
           <div className={`${colors.badge} px-3 py-1.5 rounded-lg text-sm font-bold`}>
             {countdown.days} Days
@@ -156,7 +159,7 @@ export function HolidayCard({ holiday, variant = 'standard' }: HolidayCardProps)
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-bold leading-tight text-slate-800 dark:text-white">{holiday.name}</h3>
-            <p className={`${colors.dateText} text-sm font-medium`}>{formatDate(holiday.date)}</p>
+            <p className={`${colors.dateText} text-sm font-medium`}>{formatDate(displayDate)}</p>
           </div>
           <div className={`${colors.badge} px-3 py-1.5 rounded-lg text-sm font-bold`}>
             {countdown.days} Days
@@ -164,11 +167,11 @@ export function HolidayCard({ holiday, variant = 'standard' }: HolidayCardProps)
         </div>
         
         {/* Additional info row */}
-        {holiday.date.getHours() !== 0 && (
+        {displayDate.getHours() !== 0 && (
           <div className="mt-3 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
             <span className="material-symbols-outlined text-[16px]">schedule</span>
             <span className="font-medium">
-              {holiday.date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
+              {displayDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
             </span>
           </div>
         )}
