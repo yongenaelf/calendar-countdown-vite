@@ -170,16 +170,6 @@ export function HolidayListScreen() {
           <div className="h-24"></div>
         </main>
         
-        {/* FAB */}
-        <div className="absolute bottom-8 right-6 z-30">
-          <button 
-            onClick={() => navigate('/add')}
-            className="group flex items-center justify-center w-16 h-16 bg-primary dark:bg-primary hover:bg-primary-light text-white rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-200"
-          >
-            <span className="material-symbols-outlined text-[32px]">add</span>
-          </button>
-        </div>
-        
         {/* Bottom indicator */}
         <div className="absolute bottom-0 w-full h-1 bg-transparent pointer-events-none">
           <div className="mx-auto w-1/3 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mb-2"></div>
@@ -230,6 +220,18 @@ export function HolidayListScreen() {
           </div>
         )}
       </MobileContainer>
+
+      {/* FAB - Fixed position to always be visible */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none z-30">
+        <div className="relative w-full h-0">
+          <button 
+            onClick={() => navigate('/add')}
+            className="absolute bottom-0 right-6 pointer-events-auto group flex items-center justify-center w-16 h-16 bg-primary dark:bg-primary hover:bg-primary-light text-white rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all duration-200"
+          >
+            <span className="material-symbols-outlined text-[32px]">add</span>
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
