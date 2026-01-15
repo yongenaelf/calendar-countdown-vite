@@ -234,12 +234,25 @@ const REPEAT_OPTIONS = [
 
 type RepeatOption = typeof REPEAT_OPTIONS[number]['value'];
 
+const REMINDER_OPTIONS = [
+  { value: 'none', label: 'No reminder', description: "I'll remember!", icon: 'notifications_off' },
+  { value: 'on_day', label: 'On day of event', description: 'Wake up to excitement', icon: 'today' },
+  { value: '1_day', label: '1 day before', description: 'Time to prepare!', icon: 'event' },
+  { value: '3_days', label: '3 days before', description: 'Start the countdown', icon: 'date_range' },
+  { value: '1_week', label: '1 week before', description: 'Plan ahead', icon: 'calendar_month' },
+  { value: '2_weeks', label: '2 weeks before', description: 'Early bird reminder', icon: 'event_upcoming' },
+] as const;
+
+type ReminderOption = typeof REMINDER_OPTIONS[number]['value'];
+
 export function AddHolidayScreen() {
   const navigate = useNavigate();
   const [name, setName] = useState("Mom's Birthday");
   const [allDay, setAllDay] = useState(true);
   const [repeatOption, setRepeatOption] = useState<RepeatOption>('yearly');
   const [showRepeatSheet, setShowRepeatSheet] = useState(false);
+  const [reminderOption, setReminderOption] = useState<ReminderOption>('on_day');
+  const [showReminderSheet, setShowReminderSheet] = useState(false);
   
   // Date state
   const currentDate = new Date();
@@ -392,7 +405,10 @@ export function AddHolidayScreen() {
                 </div>
               </button>
               <div className="h-px w-full bg-sky-100 dark:bg-slate-800 ml-16"></div>
-              <div className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-sky-50 dark:active:bg-slate-700/30 transition-colors group">
+              <button 
+                onClick={() => setShowReminderSheet(true)}
+                className="w-full flex items-center justify-between px-5 py-4 cursor-pointer active:bg-sky-50 dark:active:bg-slate-700/30 transition-colors group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full bg-pink-100 dark:bg-pink-500/20 text-pink-500 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-[20px]">notifications_active</span>
@@ -400,10 +416,12 @@ export function AddHolidayScreen() {
                   <span className="text-[16px] font-semibold text-slate-900 dark:text-white">Hype me up!</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[15px] text-slate-400">On day of event</span>
+                  <span className={`text-[15px] font-medium ${reminderOption === 'none' ? 'text-slate-400' : 'text-pink-500'}`}>
+                    {REMINDER_OPTIONS.find(o => o.value === reminderOption)?.label}
+                  </span>
                   <span className="material-symbols-outlined text-slate-400 text-xl">chevron_right</span>
                 </div>
-              </div>
+              </button>
             </div>
             
             {/* Notes */}
@@ -482,6 +500,81 @@ export function AddHolidayScreen() {
                     </div>
                     {repeatOption === option.value && (
                       <div className="h-8 w-8 rounded-full bg-joy-orange flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white text-[18px]">check</span>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Safe area padding */}
+              <div className="h-8" />
+            </div>
+          </div>
+        )}
+        
+        {/* Reminder Option Bottom Sheet */}
+        {showReminderSheet && (
+          <div className="fixed inset-0 z-[100]">
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+              onClick={() => setShowReminderSheet(false)}
+            />
+            
+            {/* Sheet */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-surface-dark rounded-t-[20px] animate-slide-up shadow-2xl">
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-10 h-1 bg-slate-300 dark:bg-slate-600 rounded-full" />
+              </div>
+              
+              {/* Header */}
+              <div className="px-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">
+                  Hype me up! 🔔
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 text-center mt-1">
+                  When should we remind you?
+                </p>
+              </div>
+              
+              {/* Options */}
+              <div className="p-4 space-y-2 max-h-[50vh] overflow-y-auto">
+                {REMINDER_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setReminderOption(option.value);
+                      setShowReminderSheet(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-4 py-4 rounded-2xl transition-all active:scale-[0.98] ${
+                      reminderOption === option.value
+                        ? 'bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-500/10 dark:to-rose-500/10 ring-2 ring-pink-400/50'
+                        : 'bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${
+                      reminderOption === option.value
+                        ? 'bg-pink-500 text-white'
+                        : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
+                    }`}>
+                      <span className="material-symbols-outlined text-[20px]">{option.icon}</span>
+                    </div>
+                    <div className="flex-1 flex flex-col items-start">
+                      <span className={`text-[16px] font-semibold ${
+                        reminderOption === option.value 
+                          ? 'text-pink-500' 
+                          : 'text-slate-900 dark:text-white'
+                      }`}>
+                        {option.label}
+                      </span>
+                      <span className="text-[13px] text-slate-500 dark:text-slate-400">
+                        {option.description}
+                      </span>
+                    </div>
+                    {reminderOption === option.value && (
+                      <div className="h-8 w-8 rounded-full bg-pink-500 flex items-center justify-center">
                         <span className="material-symbols-outlined text-white text-[18px]">check</span>
                       </div>
                     )}
