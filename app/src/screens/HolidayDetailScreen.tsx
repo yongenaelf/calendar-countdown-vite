@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MobileContainer, IconButton, Button } from '../components';
 import { useCountdown } from '../hooks/useCountdown';
@@ -92,9 +93,17 @@ function calculateProgress(date: Date, recurrence: Holiday['recurrence']): { pro
 export function HolidayDetailScreen() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { getHoliday } = useHolidays();
+  const { getHoliday, deleteHoliday } = useHolidays();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const holiday = getHoliday(id || '');
+  
+  const handleDelete = () => {
+    if (id) {
+      deleteHoliday(id);
+      navigate('/holidays');
+    }
+  };
   
   // If holiday not found, redirect to list
   if (!holiday) {
@@ -262,7 +271,12 @@ export function HolidayDetailScreen() {
             
             {/* Footer Actions */}
             <div className="mt-4 mb-8">
-              <Button variant="danger" className="w-full" icon="delete">
+              <Button 
+                variant="danger" 
+                className="w-full" 
+                icon="delete"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
                 Delete Holiday
               </Button>
               <p className="mt-4 text-center text-xs text-slate-500 dark:text-slate-600">
@@ -272,6 +286,51 @@ export function HolidayDetailScreen() {
           </div>
         </div>
       </MobileContainer>
+      
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 animate-fade-in">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowDeleteConfirm(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-white dark:bg-surface-dark rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-slide-up">
+            {/* Icon */}
+            <div className="flex justify-center mb-4">
+              <div className="h-16 w-16 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
+                <span className="material-symbols-outlined text-red-500 text-3xl">delete_forever</span>
+              </div>
+            </div>
+            
+            {/* Content */}
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white text-center mb-2">
+              Delete "{holiday.name}"?
+            </h3>
+            <p className="text-slate-500 dark:text-slate-400 text-center text-sm mb-6">
+              This action cannot be undone. This celebration will be permanently removed from your list.
+            </p>
+            
+            {/* Actions */}
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleDelete}
+                className="w-full py-3.5 px-6 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl active:scale-[0.98] transition-all"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="w-full py-3.5 px-6 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold rounded-xl active:scale-[0.98] transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
