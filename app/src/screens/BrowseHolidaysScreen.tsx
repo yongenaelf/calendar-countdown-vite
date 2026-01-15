@@ -169,6 +169,8 @@ export function BrowseHolidaysScreen() {
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
+      dedupingInterval: 86400000, // 24 hours - matches localStorage cache
+      refreshInterval: 0,
     }
   );
   
@@ -225,42 +227,26 @@ export function BrowseHolidaysScreen() {
     );
   }, [sortedCountries, searchQuery]);
 
-  // Get suggested countries (user's country + popular ones)
-  const suggestedCountries = useMemo(() => {
-    const suggested: CountryWithFlag[] = [];
-    
-    if (userCountryCode) {
-      const userCountry = countries.find(c => c.countryCode === userCountryCode);
-      if (userCountry) suggested.push(userCountry);
-    }
-    
-    const popularCodes = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'JP', 'IN'];
-    for (const code of popularCodes) {
-      if (suggested.length >= 3) break;
-      if (code === userCountryCode) continue;
-      const country = countries.find(c => c.countryCode === code);
-      if (country) suggested.push(country);
-    }
-    
-    return suggested.slice(0, 3);
+  // Get suggested country (user's current country only)
+  const suggestedCountry = useMemo(() => {
+    if (!userCountryCode) return null;
+    return countries.find(c => c.countryCode === userCountryCode) || null;
   }, [countries, userCountryCode]);
 
-  // Filter for "All Countries" (exclude suggested ones)
+  // Filter for "All Countries" (exclude suggested country)
   const allCountries = useMemo(() => {
-    const suggestedCodes = new Set(suggestedCountries.map(c => c.countryCode));
-    return filteredCountries.filter(c => !suggestedCodes.has(c.countryCode));
-  }, [filteredCountries, suggestedCountries]);
+    if (!suggestedCountry) return filteredCountries;
+    return filteredCountries.filter(c => c.countryCode !== suggestedCountry.countryCode);
+  }, [filteredCountries, suggestedCountry]);
 
   // Build rows for virtual list
   const rows: ListRow[] = useMemo(() => {
     const result: ListRow[] = [];
     
-    // Add suggested section (only if not searching)
-    if (suggestedCountries.length > 0 && !searchQuery) {
+    // Add suggested section (only if not searching and user country detected)
+    if (suggestedCountry && !searchQuery) {
       result.push({ type: 'suggested-header' });
-      suggestedCountries.forEach((country, index) => {
-        result.push({ type: 'country', country, index });
-      });
+      result.push({ type: 'country', country: suggestedCountry, index: 0 });
     }
     
     // Add all countries header
@@ -280,7 +266,7 @@ export function BrowseHolidaysScreen() {
     }
     
     return result;
-  }, [suggestedCountries, allCountries, searchQuery]);
+  }, [suggestedCountry, allCountries, searchQuery]);
 
   // Virtualizer
   const rowVirtualizer = useVirtualizer({
@@ -454,7 +440,7 @@ export function BrowseHolidaysScreen() {
                         <div className="flex items-center gap-2 px-2">
                           <span className="material-symbols-outlined text-joy-yellow dark:text-joy-yellow text-lg">star</span>
                           <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                            {userCountryCode ? 'Suggested for you' : 'Popular choices'}
+                            Suggested for you
                           </span>
                         </div>
                       </div>

@@ -83,18 +83,49 @@ export function getCountryFlag(countryCode: string): string {
   return countryFlags[countryCode.toUpperCase()] || '🏳️';
 }
 
+const USER_COUNTRY_KEY = 'holiday-app-user-country';
+const USER_COUNTRY_TIMESTAMP_KEY = 'holiday-app-user-country-timestamp';
+const COUNTRY_CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours in ms
+
 /**
  * Detect user's country using IP geolocation
+ * Uses https://api.country.is/ - returns { ip: string, country: string }
+ * Results are cached in localStorage for 24 hours to avoid rate limiting
  */
 export async function detectUserCountry(): Promise<string | null> {
   try {
-    // Using a free IP geolocation API
-    const response = await fetch('https://ipapi.co/country_code/');
-    if (!response.ok) return null;
-    const countryCode = await response.text();
-    return countryCode.trim().toUpperCase();
+    // Check localStorage cache first
+    const cachedCountry = localStorage.getItem(USER_COUNTRY_KEY);
+    const cachedTimestamp = localStorage.getItem(USER_COUNTRY_TIMESTAMP_KEY);
+    
+    if (cachedCountry && cachedTimestamp) {
+      const age = Date.now() - parseInt(cachedTimestamp, 10);
+      if (age < COUNTRY_CACHE_DURATION) {
+        return cachedCountry;
+      }
+    }
+    
+    // Fetch from API if cache is missing or expired
+    const response = await fetch('https://api.country.is/');
+    if (!response.ok) {
+      // If rate limited, return cached value if available
+      if (response.status === 429 && cachedCountry) {
+        return cachedCountry;
+      }
+      return null;
+    }
+    const data = await response.json();
+    const normalizedCode = (data.country as string).toUpperCase();
+    
+    // Cache the result
+    localStorage.setItem(USER_COUNTRY_KEY, normalizedCode);
+    localStorage.setItem(USER_COUNTRY_TIMESTAMP_KEY, Date.now().toString());
+    
+    return normalizedCode;
   } catch {
-    return null;
+    // On error, return cached value if available
+    const cachedCountry = localStorage.getItem(USER_COUNTRY_KEY);
+    return cachedCountry || null;
   }
 }
 
