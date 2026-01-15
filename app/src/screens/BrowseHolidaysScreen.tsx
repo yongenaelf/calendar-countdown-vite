@@ -22,6 +22,7 @@ const accentColors = {
     bg: 'has-[:checked]:bg-gradient-to-br has-[:checked]:from-orange-50 has-[:checked]:to-yellow-50 dark:has-[:checked]:from-joy-orange/10 dark:has-[:checked]:to-yellow-500/10',
     shadow: 'has-[:checked]:shadow-joy-orange/20 dark:has-[:checked]:shadow-none',
     checkbox: 'peer-checked:bg-joy-orange peer-checked:border-joy-orange',
+    checkboxActive: 'bg-joy-orange border-joy-orange',
     hover: 'group-hover:text-joy-orange',
   },
   pink: {
@@ -29,6 +30,7 @@ const accentColors = {
     bg: 'has-[:checked]:bg-pink-50 dark:has-[:checked]:bg-joy-pink/10',
     shadow: 'has-[:checked]:shadow-joy-pink/20 dark:has-[:checked]:shadow-none',
     checkbox: 'peer-checked:bg-joy-pink peer-checked:border-joy-pink',
+    checkboxActive: 'bg-joy-pink border-joy-pink',
     hover: 'group-hover:text-joy-pink',
   },
   yellow: {
@@ -36,6 +38,7 @@ const accentColors = {
     bg: 'has-[:checked]:bg-yellow-50 dark:has-[:checked]:bg-joy-yellow/10',
     shadow: 'has-[:checked]:shadow-joy-yellow/30 dark:has-[:checked]:shadow-none',
     checkbox: 'peer-checked:bg-joy-yellow peer-checked:border-joy-yellow',
+    checkboxActive: 'bg-joy-yellow border-joy-yellow',
     hover: 'group-hover:text-joy-yellow',
   },
 };
@@ -121,8 +124,8 @@ function CountryItem({ flag, name, countryCode, checked = false, onChange, accen
         </div>
       </div>
       <div className="shrink-0 z-10">
-        <div className={`size-8 rounded-full border-2 border-slate-200 dark:border-slate-600 bg-white dark:bg-surface-dark flex items-center justify-center text-white ${colors.checkbox} peer-checked:scale-110 transition-all duration-300 shadow-sm dark:shadow-none`}>
-          <span className="material-symbols-outlined text-xl font-bold opacity-0 peer-checked:opacity-100 scale-50 peer-checked:scale-100 transition-all">check</span>
+        <div className={`size-8 rounded-full border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center text-white transition-all duration-300 shadow-sm dark:shadow-none peer-checked:scale-110 ${checked ? colors.checkboxActive : 'bg-white dark:bg-surface-dark'}`}>
+          <span className={`material-symbols-outlined text-xl font-bold transition-all ${checked ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>check</span>
         </div>
       </div>
     </label>
