@@ -1,15 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useSWR from 'swr';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { MobileContainer, IconButton, Button } from '../components';
+import { useHolidays } from '../context';
+import { 
+  fetchAvailableCountries, 
+  fetchPublicHolidays, 
+  getCountryFlag, 
+  detectUserCountry,
+  getHolidayIcon,
+  getRandomHolidayColor,
+  type NagerCountry
+} from '../services/holidayApi';
 
-interface CountryItemProps {
-  flag: string;
-  name: string;
-  holidayCount: number;
-  checked?: boolean;
-  onChange?: (checked: boolean) => void;
-  accentColor: 'orange' | 'pink' | 'yellow';
-}
+const currentYear = new Date().getFullYear();
 
 const accentColors = {
   orange: {
@@ -35,11 +40,62 @@ const accentColors = {
   },
 };
 
-function CountryItem({ flag, name, holidayCount, checked = false, onChange, accentColor }: CountryItemProps) {
+type AccentColor = 'orange' | 'pink' | 'yellow';
+
+interface CountryItemProps {
+  flag: string;
+  name: string;
+  countryCode: string;
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  accentColor: AccentColor;
+}
+
+// SWR fetcher for holidays
+const holidayFetcher = (countryCode: string) => fetchPublicHolidays(currentYear, countryCode);
+
+function CountryItem({ flag, name, countryCode, checked = false, onChange, accentColor }: CountryItemProps) {
   const colors = accentColors[accentColor];
+  const itemRef = useRef<HTMLLabelElement>(null);
+  const [shouldFetch, setShouldFetch] = useState(false);
+  
+  // Use IntersectionObserver to trigger fetch only when item is in viewport
+  useEffect(() => {
+    if (shouldFetch) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShouldFetch(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '50px' }
+    );
+    
+    if (itemRef.current) {
+      observer.observe(itemRef.current);
+    }
+    
+    return () => observer.disconnect();
+  }, [shouldFetch]);
+  
+  // Fetch holidays only when triggered
+  const { data } = useSWR(
+    shouldFetch ? countryCode : null,
+    holidayFetcher,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      dedupingInterval: 60000,
+    }
+  );
+  
+  const holidayCount = data?.length ?? null;
+  const isLoading = shouldFetch && !data;
   
   return (
-    <label className={`group relative flex items-center gap-4 p-4 rounded-3xl bg-white dark:bg-surface-dark border-2 border-white/60 dark:border-white/5 hover:border-joy-yellow/50 dark:hover:border-white/10 transition-all duration-300 ${colors.border} ${colors.bg} has-[:checked]:shadow-lg ${colors.shadow} cursor-pointer overflow-hidden transform hover:-translate-y-1`}>
+    <label ref={itemRef} className={`group relative flex items-center gap-4 p-4 rounded-3xl bg-white dark:bg-surface-dark border-2 border-white/60 dark:border-white/5 hover:border-joy-yellow/50 dark:hover:border-white/10 transition-all duration-300 ${colors.border} ${colors.bg} has-[:checked]:shadow-lg ${colors.shadow} cursor-pointer overflow-hidden transform hover:-translate-y-1`}>
       <input 
         type="checkbox" 
         checked={checked}
@@ -55,7 +111,13 @@ function CountryItem({ flag, name, holidayCount, checked = false, onChange, acce
         <p className={`text-slate-800 dark:text-white text-lg font-bold leading-tight ${colors.hover} transition-colors`}>{name}</p>
         <div className="flex items-center gap-1.5 mt-1">
           <span className="material-symbols-outlined text-[16px] text-joy-pink dark:text-primary">calendar_month</span>
-          <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">{holidayCount} Holidays</p>
+          {isLoading ? (
+            <div className="h-3 w-16 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+          ) : holidayCount !== null ? (
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-bold">
+              {holidayCount} Holidays
+            </p>
+          ) : null}
         </div>
       </div>
       <div className="shrink-0 z-10">
@@ -67,44 +129,205 @@ function CountryItem({ flag, name, holidayCount, checked = false, onChange, acce
   );
 }
 
-const countries = [
-  { flag: '🇺🇸', name: 'United States', count: 11 },
-  { flag: '🇬🇧', name: 'United Kingdom', count: 8 },
-  { flag: '🇨🇦', name: 'Canada', count: 13 },
-  { flag: '🇦🇺', name: 'Australia', count: 10 },
-  { flag: '🇯🇵', name: 'Japan', count: 16 },
-  { flag: '🇩🇪', name: 'Germany', count: 14 },
-  { flag: '🇫🇷', name: 'France', count: 11 },
-  { flag: '🇮🇳', name: 'India', count: 21 },
-  { flag: '🇧🇷', name: 'Brazil', count: 12 },
-  { flag: '🇲🇽', name: 'Mexico', count: 11 },
-];
+interface CountryWithFlag extends NagerCountry {
+  flag: string;
+}
+
+// Row types for the virtual list
+type ListRow = 
+  | { type: 'suggested-header' }
+  | { type: 'all-header'; count: number; isSearch: boolean }
+  | { type: 'country'; country: CountryWithFlag; index: number }
+  | { type: 'empty-search' };
 
 export function BrowseHolidaysScreen() {
   const navigate = useNavigate();
+  const { addHoliday } = useHolidays();
   const [selectedTab, setSelectedTab] = useState<'countries' | 'religions'>('countries');
-  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set(['Canada']));
+  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const parentRef = useRef<HTMLDivElement>(null);
+  
+  // Fetch countries using SWR
+  const { data: countriesData, isLoading: isLoadingCountries, error: countriesError } = useSWR(
+    'countries',
+    fetchAvailableCountries,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+  
+  // Detect user country
+  const { data: userCountryCode } = useSWR(
+    'userCountry',
+    detectUserCountry,
+    {
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+    }
+  );
+  
+  // Transform countries with flags
+  const countries: CountryWithFlag[] = useMemo(() => {
+    if (!countriesData) return [];
+    return countriesData.map(c => ({
+      ...c,
+      flag: getCountryFlag(c.countryCode),
+    }));
+  }, [countriesData]);
+  
+  // Pre-select user's country when detected
+  useEffect(() => {
+    if (userCountryCode && countriesData?.some(c => c.countryCode === userCountryCode)) {
+      setSelectedCountries(prev => {
+        if (prev.size === 0) {
+          return new Set([userCountryCode]);
+        }
+        return prev;
+      });
+    }
+  }, [userCountryCode, countriesData]);
 
-  const toggleCountry = (name: string, checked: boolean) => {
+  const toggleCountry = (countryCode: string, checked: boolean) => {
     setSelectedCountries(prev => {
       const next = new Set(prev);
       if (checked) {
-        next.add(name);
+        next.add(countryCode);
       } else {
-        next.delete(name);
+        next.delete(countryCode);
       }
       return next;
     });
   };
 
-  const totalHolidays = countries
-    .filter(c => selectedCountries.has(c.name))
-    .reduce((sum, c) => sum + c.count, 0);
+  // Sort countries: user's country first, then alphabetically
+  const sortedCountries = useMemo(() => {
+    return [...countries].sort((a, b) => {
+      if (userCountryCode) {
+        if (a.countryCode === userCountryCode) return -1;
+        if (b.countryCode === userCountryCode) return 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
+  }, [countries, userCountryCode]);
 
-  const filteredCountries = countries.filter(c => 
-    c.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredCountries = useMemo(() => {
+    if (!searchQuery.trim()) return sortedCountries;
+    const query = searchQuery.toLowerCase();
+    return sortedCountries.filter(c => 
+      c.name.toLowerCase().includes(query) ||
+      c.countryCode.toLowerCase().includes(query)
+    );
+  }, [sortedCountries, searchQuery]);
+
+  // Get suggested countries (user's country + popular ones)
+  const suggestedCountries = useMemo(() => {
+    const suggested: CountryWithFlag[] = [];
+    
+    if (userCountryCode) {
+      const userCountry = countries.find(c => c.countryCode === userCountryCode);
+      if (userCountry) suggested.push(userCountry);
+    }
+    
+    const popularCodes = ['US', 'GB', 'CA', 'AU', 'DE', 'FR', 'JP', 'IN'];
+    for (const code of popularCodes) {
+      if (suggested.length >= 3) break;
+      if (code === userCountryCode) continue;
+      const country = countries.find(c => c.countryCode === code);
+      if (country) suggested.push(country);
+    }
+    
+    return suggested.slice(0, 3);
+  }, [countries, userCountryCode]);
+
+  // Filter for "All Countries" (exclude suggested ones)
+  const allCountries = useMemo(() => {
+    const suggestedCodes = new Set(suggestedCountries.map(c => c.countryCode));
+    return filteredCountries.filter(c => !suggestedCodes.has(c.countryCode));
+  }, [filteredCountries, suggestedCountries]);
+
+  // Build rows for virtual list
+  const rows: ListRow[] = useMemo(() => {
+    const result: ListRow[] = [];
+    
+    // Add suggested section (only if not searching)
+    if (suggestedCountries.length > 0 && !searchQuery) {
+      result.push({ type: 'suggested-header' });
+      suggestedCountries.forEach((country, index) => {
+        result.push({ type: 'country', country, index });
+      });
+    }
+    
+    // Add all countries header
+    result.push({ 
+      type: 'all-header', 
+      count: allCountries.length,
+      isSearch: !!searchQuery 
+    });
+    
+    // Add all countries or empty state
+    if (allCountries.length === 0 && searchQuery) {
+      result.push({ type: 'empty-search' });
+    } else {
+      allCountries.forEach((country, index) => {
+        result.push({ type: 'country', country, index });
+      });
+    }
+    
+    return result;
+  }, [suggestedCountries, allCountries, searchQuery]);
+
+  // Virtualizer
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: (index) => {
+      const row = rows[index];
+      if (row.type === 'suggested-header' || row.type === 'all-header') return 48;
+      if (row.type === 'empty-search') return 120;
+      return 94; // Country item height
+    },
+    overscan: 3,
+  });
+
+  const virtualItems = rowVirtualizer.getVirtualItems();
+
+  // Handle import
+  const handleImport = async () => {
+    setIsImporting(true);
+    
+    try {
+      for (const countryCode of selectedCountries) {
+        const holidays = await fetchPublicHolidays(currentYear, countryCode);
+        const country = countries.find(c => c.countryCode === countryCode);
+        
+        for (const holiday of holidays) {
+          addHoliday({
+            name: holiday.name,
+            date: new Date(holiday.date),
+            icon: getHolidayIcon(holiday.types),
+            category: 'celebration',
+            color: getRandomHolidayColor(),
+            description: holiday.localName !== holiday.name ? `Local name: ${holiday.localName}` : undefined,
+            recurrence: 'yearly',
+            source: country?.name || countryCode,
+          });
+        }
+      }
+      
+      navigate('/holidays');
+    } catch (err) {
+      console.error('Error importing holidays:', err);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const getAccentColor = (index: number): AccentColor => {
+    return ['orange', 'pink', 'yellow'][index % 3] as AccentColor;
+  };
 
   return (
     <div className="bg-gradient-to-br from-relax-blue via-relax-green to-relax-teal dark:from-background-dark dark:via-background-dark dark:to-background-dark min-h-screen">
@@ -168,7 +391,7 @@ export function BrowseHolidaysScreen() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for a place or faith..."
+                placeholder="Search for a country..."
                 className="flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-2xl bg-white/60 dark:bg-surface-dark focus:bg-white dark:focus:bg-surface-dark-elevated border-2 border-transparent focus:border-joy-pink/30 dark:focus:border-primary/30 focus:ring-4 focus:ring-joy-pink/10 dark:focus:ring-primary/10 h-full placeholder:text-slate-400 dark:placeholder:text-slate-500 pl-11 pr-4 text-base font-medium leading-normal text-slate-800 dark:text-white transition-all shadow-sm dark:shadow-none"
               />
             </label>
@@ -176,62 +399,122 @@ export function BrowseHolidaysScreen() {
         </header>
         
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto pb-32 px-4 pt-2 no-scrollbar">
-          <div className="flex flex-col gap-3">
-            {/* Suggested */}
-            <div className="py-2 sticky top-0 z-10 bg-gradient-to-b from-white/0 via-white/90 dark:via-background-dark/90 to-transparent pb-4 backdrop-blur-[1px]">
-              <div className="flex items-center gap-2 px-2">
-                <span className="material-symbols-outlined text-joy-yellow dark:text-joy-yellow text-lg">star</span>
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Suggested for you</span>
-              </div>
+        <main 
+          ref={parentRef}
+          className="flex-1 overflow-y-auto pb-32 px-4 pt-2 no-scrollbar"
+          style={{ height: 'calc(100vh - 220px)' }}
+        >
+          {/* Error state */}
+          {countriesError && (
+            <div className="mb-4 p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20">
+              <p className="text-red-600 dark:text-red-400 text-sm font-medium text-center">Failed to load countries. Please try again.</p>
+              <button 
+                onClick={() => window.location.reload()}
+                className="mt-2 w-full text-center text-sm text-red-500 font-semibold"
+              >
+                Tap to retry
+              </button>
             </div>
-            
-            {filteredCountries.slice(0, 3).map((country, i) => (
-              <CountryItem
-                key={country.name}
-                flag={country.flag}
-                name={country.name}
-                holidayCount={country.count}
-                checked={selectedCountries.has(country.name)}
-                onChange={(checked) => toggleCountry(country.name, checked)}
-                accentColor={['orange', 'pink', 'yellow'][i % 3] as 'orange' | 'pink' | 'yellow'}
-              />
-            ))}
-            
-            {/* All countries */}
-            <div className="py-2 mt-4 sticky top-0 z-10 bg-gradient-to-b from-white/0 via-white/90 dark:via-background-dark/90 to-transparent pb-4 backdrop-blur-[1px]">
-              <div className="flex items-center gap-2 px-2">
-                <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-lg">public</span>
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">All Countries</span>
-              </div>
+          )}
+          
+          {/* Loading state */}
+          {isLoadingCountries ? (
+            <div className="flex flex-col items-center justify-center py-12 gap-4">
+              <div className="size-12 rounded-full border-4 border-joy-orange/30 border-t-joy-orange animate-spin" />
+              <p className="text-slate-500 dark:text-slate-400 font-medium">Loading countries...</p>
             </div>
-            
-            {filteredCountries.slice(3).map((country, i) => (
-              <CountryItem
-                key={country.name}
-                flag={country.flag}
-                name={country.name}
-                holidayCount={country.count}
-                checked={selectedCountries.has(country.name)}
-                onChange={(checked) => toggleCountry(country.name, checked)}
-                accentColor={['orange', 'pink', 'yellow'][i % 3] as 'orange' | 'pink' | 'yellow'}
-              />
-            ))}
-          </div>
+          ) : (
+            <div
+              style={{
+                height: `${rowVirtualizer.getTotalSize()}px`,
+                width: '100%',
+                position: 'relative',
+              }}
+            >
+              {virtualItems.map((virtualRow) => {
+                const row = rows[virtualRow.index];
+                
+                return (
+                  <div
+                    key={virtualRow.key}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                  >
+                    {row.type === 'suggested-header' && (
+                      <div className="py-2 bg-gradient-to-b from-white/0 via-white/90 dark:via-background-dark/90 to-transparent pb-4 backdrop-blur-[1px]">
+                        <div className="flex items-center gap-2 px-2">
+                          <span className="material-symbols-outlined text-joy-yellow dark:text-joy-yellow text-lg">star</span>
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            {userCountryCode ? 'Suggested for you' : 'Popular choices'}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {row.type === 'all-header' && (
+                      <div className="py-2 mt-4 bg-gradient-to-b from-white/0 via-white/90 dark:via-background-dark/90 to-transparent pb-4 backdrop-blur-[1px]">
+                        <div className="flex items-center gap-2 px-2">
+                          <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-lg">public</span>
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                            {row.isSearch ? `Search results (${row.count})` : `All Countries (${row.count})`}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {row.type === 'empty-search' && (
+                      <div className="flex flex-col items-center justify-center py-8 gap-3">
+                        <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">search_off</span>
+                        <p className="text-slate-500 dark:text-slate-400 font-medium">No countries found</p>
+                      </div>
+                    )}
+                    
+                    {row.type === 'country' && (
+                      <div className="pb-3">
+                        <CountryItem
+                          flag={row.country.flag}
+                          name={row.country.name}
+                          countryCode={row.country.countryCode}
+                          checked={selectedCountries.has(row.country.countryCode)}
+                          onChange={(checked) => toggleCountry(row.country.countryCode, checked)}
+                          accentColor={getAccentColor(row.index)}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </main>
         
-        {/* Footer CTA */}
-        <div className="absolute bottom-0 w-full z-30 p-4 pt-4 bg-gradient-to-t from-white dark:from-background-dark via-white/80 dark:via-background-dark/80 to-transparent backdrop-blur-sm">
-          <Button 
-            className="w-full" 
-            size="md" 
-            icon="celebration"
-            disabled={selectedCountries.size === 0}
-          >
-            Import {totalHolidays} Holidays
-          </Button>
-        </div>
       </MobileContainer>
+      
+      {/* Footer CTA - Outside MobileContainer for proper fixed positioning */}
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 p-4 pt-6 bg-gradient-to-t from-white dark:from-background-dark via-white/95 dark:via-background-dark/95 to-transparent">
+        <Button 
+          className="w-full" 
+          size="md" 
+          icon={isImporting ? undefined : "celebration"}
+          disabled={selectedCountries.size === 0 || isImporting}
+          onClick={handleImport}
+        >
+          {isImporting ? (
+            <span className="flex items-center gap-2">
+              <span className="size-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              Importing...
+            </span>
+          ) : (
+            `Import Holidays (${selectedCountries.size} countries)`
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
