@@ -61,35 +61,6 @@ function getNextOccurrence(date: Date, recurrence: Holiday['recurrence']): Date 
   return nextDate;
 }
 
-// Calculate progress between last and next occurrence
-function calculateProgress(date: Date, recurrence: Holiday['recurrence']): { progress: number; lastDate: Date; nextDate: Date } {
-  const now = new Date();
-  const nextDate = getNextOccurrence(date, recurrence);
-  
-  // Calculate last occurrence
-  const lastDate = new Date(nextDate);
-  switch (recurrence) {
-    case 'yearly':
-      lastDate.setFullYear(lastDate.getFullYear() - 1);
-      break;
-    case 'monthly':
-      lastDate.setMonth(lastDate.getMonth() - 1);
-      break;
-    case 'weekly':
-      lastDate.setDate(lastDate.getDate() - 7);
-      break;
-    default:
-      // For one-time events, set lastDate to a year before
-      lastDate.setFullYear(lastDate.getFullYear() - 1);
-  }
-  
-  const totalDuration = nextDate.getTime() - lastDate.getTime();
-  const elapsed = now.getTime() - lastDate.getTime();
-  const progress = Math.min(100, Math.max(0, Math.round((elapsed / totalDuration) * 100)));
-  
-  return { progress, lastDate, nextDate };
-}
-
 export function HolidayDetailScreen() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
@@ -131,7 +102,6 @@ export function HolidayDetailScreen() {
       </div>
     );
   }
-  const { progress, lastDate, nextDate } = calculateProgress(holiday.date, holiday.recurrence);
   const image = categoryImages[holiday.category] || categoryImages.custom;
 
   return (
@@ -199,24 +169,6 @@ export function HolidayDetailScreen() {
         {/* Scrollable Content Area */}
         <div className="relative z-10 flex-1 overflow-y-auto no-scrollbar bg-background-light dark:bg-background-dark rounded-t-[2rem] shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.5)]">
           <div className="p-6 flex flex-col gap-6">
-            {/* Progress Section */}
-            <div className="flex flex-col gap-3">
-              <div className="flex justify-between items-end">
-                <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Progress</span>
-                <span className="text-slate-900 dark:text-white text-sm font-bold">{progress}%</span>
-              </div>
-              <div className="h-3 w-full rounded-full bg-slate-200 dark:bg-surface-dark overflow-hidden">
-                <div 
-                  className="h-full rounded-full bg-primary shadow-[0_0_10px_rgba(43,173,238,0.5)]" 
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="flex justify-between text-xs text-slate-400">
-                <span>Last: {lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                <span>Next: {nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-              </div>
-            </div>
-            
             {/* Info Cards */}
             <div className="flex flex-col gap-4">
               <h3 className="text-slate-900 dark:text-white text-lg font-bold">Details</h3>
