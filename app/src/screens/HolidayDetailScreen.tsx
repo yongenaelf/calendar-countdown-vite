@@ -1,30 +1,124 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { MobileContainer, IconButton, Button } from '../components';
 import { useCountdown } from '../hooks/useCountdown';
+import { useHolidays } from '../context';
+import type { Holiday } from '../types/holiday';
 
-// Sample holiday data - in real app this would come from a store/API
-const holidayData = {
-  '1': {
-    id: '1',
-    name: 'Christmas',
-    date: new Date('2025-12-25'),
-    icon: 'forest',
-    category: 'Religious',
-    description: 'Christmas is an annual festival commemorating the birth of Jesus Christ, observed primarily on December 25 as a religious and cultural celebration.',
-    recurrence: 'Repeats Yearly',
-    source: 'Imported from US Holidays',
-    image: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800&q=80',
-  },
+// Default images for different categories
+const categoryImages: Record<string, string> = {
+  religious: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800&q=80',
+  celebration: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=800&q=80',
+  birthday: 'https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=800&q=80',
+  travel: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80',
+  custom: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80',
 };
+
+// Format recurrence for display
+function formatRecurrence(recurrence?: Holiday['recurrence']): string {
+  if (!recurrence || recurrence === 'none') return 'One-time event';
+  switch (recurrence) {
+    case 'yearly': return 'Repeats Yearly';
+    case 'monthly': return 'Repeats Monthly';
+    case 'weekly': return 'Repeats Weekly';
+    default: return 'One-time event';
+  }
+}
+
+// Format category for display
+function formatCategory(category: Holiday['category']): string {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+// Calculate the next occurrence of a recurring event
+function getNextOccurrence(date: Date, recurrence: Holiday['recurrence']): Date {
+  const now = new Date();
+  const eventDate = new Date(date);
+  
+  if (eventDate > now) return eventDate;
+  if (!recurrence || recurrence === 'none') return eventDate;
+  
+  const nextDate = new Date(eventDate);
+  
+  switch (recurrence) {
+    case 'yearly':
+      while (nextDate <= now) {
+        nextDate.setFullYear(nextDate.getFullYear() + 1);
+      }
+      break;
+    case 'monthly':
+      while (nextDate <= now) {
+        nextDate.setMonth(nextDate.getMonth() + 1);
+      }
+      break;
+    case 'weekly':
+      while (nextDate <= now) {
+        nextDate.setDate(nextDate.getDate() + 7);
+      }
+      break;
+  }
+  
+  return nextDate;
+}
+
+// Calculate progress between last and next occurrence
+function calculateProgress(date: Date, recurrence: Holiday['recurrence']): { progress: number; lastDate: Date; nextDate: Date } {
+  const now = new Date();
+  const nextDate = getNextOccurrence(date, recurrence);
+  
+  // Calculate last occurrence
+  const lastDate = new Date(nextDate);
+  switch (recurrence) {
+    case 'yearly':
+      lastDate.setFullYear(lastDate.getFullYear() - 1);
+      break;
+    case 'monthly':
+      lastDate.setMonth(lastDate.getMonth() - 1);
+      break;
+    case 'weekly':
+      lastDate.setDate(lastDate.getDate() - 7);
+      break;
+    default:
+      // For one-time events, set lastDate to a year before
+      lastDate.setFullYear(lastDate.getFullYear() - 1);
+  }
+  
+  const totalDuration = nextDate.getTime() - lastDate.getTime();
+  const elapsed = now.getTime() - lastDate.getTime();
+  const progress = Math.min(100, Math.max(0, Math.round((elapsed / totalDuration) * 100)));
+  
+  return { progress, lastDate, nextDate };
+}
 
 export function HolidayDetailScreen() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { getHoliday } = useHolidays();
   
-  const holiday = holidayData[id as keyof typeof holidayData] || holidayData['1'];
-  const countdown = useCountdown(holiday.date);
+  const holiday = getHoliday(id || '');
   
-  const progress = 65; // Example progress percentage
+  // If holiday not found, redirect to list
+  if (!holiday) {
+    return (
+      <div className="bg-background-light dark:bg-background-dark min-h-screen flex items-center justify-center">
+        <div className="text-center p-8">
+          <span className="material-symbols-outlined text-6xl text-slate-300 dark:text-slate-600">event_busy</span>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mt-4">Holiday not found</h2>
+          <p className="text-slate-500 dark:text-slate-400 mt-2">This event may have been deleted.</p>
+          <button 
+            onClick={() => navigate('/holidays')}
+            className="mt-6 px-6 py-3 bg-primary text-white rounded-xl font-semibold"
+          >
+            Back to Holidays
+          </button>
+        </div>
+      </div>
+    );
+  }
+  
+  const effectiveDate = getNextOccurrence(holiday.date, holiday.recurrence);
+  const countdown = useCountdown(effectiveDate);
+  const { progress, lastDate, nextDate } = calculateProgress(holiday.date, holiday.recurrence);
+  const image = categoryImages[holiday.category] || categoryImages.custom;
 
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen">
@@ -34,7 +128,7 @@ export function HolidayDetailScreen() {
           <img 
             alt={holiday.name}
             className="h-full w-full object-cover opacity-60" 
-            src={holiday.image}
+            src={image}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-background-dark/30 via-background-dark/80 to-background-dark"></div>
         </div>
@@ -62,7 +156,7 @@ export function HolidayDetailScreen() {
           <div className="mt-3 flex items-center justify-center gap-2 rounded-full bg-white/10 backdrop-blur-sm px-4 py-1.5 border border-white/5">
             <span className="material-symbols-outlined text-primary text-[18px]">calendar_month</span>
             <span className="text-white text-sm font-semibold tracking-wide">
-              {holiday.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+              {effectiveDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
             </span>
           </div>
           
@@ -104,8 +198,8 @@ export function HolidayDetailScreen() {
                 />
               </div>
               <div className="flex justify-between text-xs text-slate-400">
-                <span>Last: Dec 25, 2024</span>
-                <span>Next: Dec 25, 2025</span>
+                <span>Last: {lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                <span>Next: {nextDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
               </div>
             </div>
             
@@ -122,7 +216,7 @@ export function HolidayDetailScreen() {
                   <div className="flex flex-col gap-1">
                     <h4 className="text-sm font-semibold text-slate-900 dark:text-white">About this Holiday</h4>
                     <p className="text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                      {holiday.description}
+                      {holiday.description || 'No description available.'}
                     </p>
                   </div>
                 </div>
@@ -136,7 +230,7 @@ export function HolidayDetailScreen() {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 font-medium">Recurrence</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{holiday.recurrence}</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatRecurrence(holiday.recurrence)}</p>
                   </div>
                 </div>
                 <div className="rounded-2xl bg-white dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-white/5 flex flex-col gap-3">
@@ -145,23 +239,25 @@ export function HolidayDetailScreen() {
                   </div>
                   <div>
                     <p className="text-xs text-slate-400 font-medium">Category</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{holiday.category}</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatCategory(holiday.category)}</p>
                   </div>
                 </div>
               </div>
               
               {/* Source */}
-              <div className="rounded-2xl bg-white dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-white/5 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/10 text-green-500">
-                    <span className="material-symbols-outlined text-[20px]">cloud_download</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <p className="text-xs text-slate-400 font-medium">Source</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{holiday.source}</p>
+              {holiday.source && (
+                <div className="rounded-2xl bg-white dark:bg-surface-dark p-4 shadow-sm border border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500/10 text-green-500">
+                      <span className="material-symbols-outlined text-[20px]">cloud_download</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-xs text-slate-400 font-medium">Source</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{holiday.source}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
             
             {/* Footer Actions */}
