@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MobileContainer } from '../components';
+import { useHolidays } from '../context';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -245,14 +245,40 @@ const REMINDER_OPTIONS = [
 
 type ReminderOption = typeof REMINDER_OPTIONS[number]['value'];
 
+// Icon options for celebrations
+const ICON_OPTIONS = ['🎉', '🎂', '🎄', '✈️', '💍', '🎓', '🏆', '❤️', '🌟', '🎁'];
+
+// Color options
+const COLOR_OPTIONS: Array<'emerald' | 'sky' | 'indigo' | 'teal' | 'pink' | 'orange'> = [
+  'pink', 'orange', 'emerald', 'sky', 'indigo', 'teal'
+];
+
+// Map emoji to material icon
+const EMOJI_TO_ICON: Record<string, string> = {
+  '🎉': 'celebration',
+  '🎂': 'cake',
+  '🎄': 'forest',
+  '✈️': 'flight_takeoff',
+  '💍': 'diamond',
+  '🎓': 'school',
+  '🏆': 'emoji_events',
+  '❤️': 'favorite',
+  '🌟': 'star',
+  '🎁': 'redeem',
+};
+
 export function AddHolidayScreen() {
   const navigate = useNavigate();
-  const [name, setName] = useState("Mom's Birthday");
+  const { addHoliday } = useHolidays();
+  
+  const [name, setName] = useState('');
+  const [selectedEmoji, setSelectedEmoji] = useState('🎉');
   const [allDay, setAllDay] = useState(true);
   const [repeatOption, setRepeatOption] = useState<RepeatOption>('yearly');
   const [showRepeatSheet, setShowRepeatSheet] = useState(false);
   const [reminderOption, setReminderOption] = useState<ReminderOption>('on_day');
   const [showReminderSheet, setShowReminderSheet] = useState(false);
+  const [notes, setNotes] = useState('');
   
   // Date state
   const currentDate = new Date();
@@ -275,6 +301,37 @@ export function AddHolidayScreen() {
     }
   }, [selectedMonth, selectedYear, daysInMonth, selectedDay]);
 
+  // Map repeat option to recurrence type
+  const getRecurrence = (): 'none' | 'yearly' | 'monthly' | 'weekly' => {
+    if (repeatOption === 'never') return 'none';
+    return repeatOption as 'yearly' | 'monthly' | 'weekly';
+  };
+
+  // Handle add celebration
+  const handleAdd = () => {
+    if (!name.trim()) {
+      // Could show an error toast here
+      return;
+    }
+
+    const year = parseInt(years[selectedYear]);
+    const month = selectedMonth;
+    const day = selectedDay + 1; // Convert from 0-indexed to 1-indexed
+    const date = new Date(year, month, day);
+
+    addHoliday({
+      name: name.trim(),
+      date,
+      icon: EMOJI_TO_ICON[selectedEmoji] || 'celebration',
+      category: 'custom',
+      color: COLOR_OPTIONS[Math.floor(Math.random() * COLOR_OPTIONS.length)],
+      description: notes.trim() || undefined,
+      recurrence: getRecurrence(),
+    });
+
+    navigate('/holidays');
+  };
+
   return (
     <div className="bg-sky-50 dark:bg-background-dark min-h-screen max-w-md mx-auto shadow-2xl dark:shadow-[0_0_50px_rgba(0,0,0,0.5)]">
       {/* Fixed Header */}
@@ -288,7 +345,11 @@ export function AddHolidayScreen() {
         <h2 className="text-slate-800 dark:text-white text-[17px] font-bold leading-tight tracking-tight text-center flex-1">
           New Celebration ✨
         </h2>
-        <button className="bg-joy-orange text-white px-5 py-1.5 rounded-full text-[15px] font-bold shadow-lg shadow-joy-orange/30 hover:shadow-joy-orange/50 active:scale-95 transition-all shrink-0">
+        <button 
+          onClick={handleAdd}
+          disabled={!name.trim()}
+          className="bg-joy-orange text-white px-5 py-1.5 rounded-full text-[15px] font-bold shadow-lg shadow-joy-orange/30 hover:shadow-joy-orange/50 active:scale-95 transition-all shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           Add
         </button>
       </header>
@@ -298,7 +359,7 @@ export function AddHolidayScreen() {
           {/* Icon and name */}
           <div className="flex flex-col items-center justify-center space-y-6 pt-2">
             <button className="group relative h-32 w-32 rounded-full bg-white dark:bg-surface-dark shadow-xl shadow-sky-200/50 dark:shadow-black/20 flex items-center justify-center transition-transform active:scale-95 border-4 border-white dark:border-surface-dark ring-4 ring-yellow-100 dark:ring-transparent">
-              <span className="text-7xl group-hover:scale-110 transition-transform duration-300 filter drop-shadow-sm">🎉</span>
+              <span className="text-7xl group-hover:scale-110 transition-transform duration-300 filter drop-shadow-sm">{selectedEmoji}</span>
               <div className="absolute -bottom-1 -right-1 bg-secondary text-white h-10 w-10 rounded-full flex items-center justify-center shadow-md border-[3px] border-white dark:border-surface-dark group-hover:rotate-12 transition-transform">
                 <span className="material-symbols-outlined text-[20px] font-bold">edit</span>
               </div>
@@ -429,6 +490,8 @@ export function AddHolidayScreen() {
                 <span className="material-symbols-outlined text-[20px]">edit_note</span>
               </div>
               <textarea 
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 className="w-full bg-transparent border-none py-4 pl-14 pr-5 text-[16px] text-slate-900 dark:text-white placeholder:text-sky-300 focus:ring-0 focus:outline-none min-h-[100px] resize-none"
                 placeholder="Any special plans or wishes? 📝"
               />

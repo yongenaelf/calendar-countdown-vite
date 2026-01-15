@@ -1,53 +1,24 @@
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer, IconButton, HolidayCard } from '../components';
-import { useTheme } from '../context';
-import type { Holiday } from '../types/holiday';
-
-// Sample data
-const holidays: Holiday[] = [
-  {
-    id: '1',
-    name: 'Christmas',
-    date: new Date('2025-12-25'),
-    icon: 'forest',
-    category: 'religious',
-    color: 'emerald',
-    description: 'Christmas is an annual festival commemorating the birth of Jesus Christ.',
-    recurrence: 'yearly',
-    source: 'US Holidays',
-  },
-  {
-    id: '2',
-    name: 'Trip to Bali',
-    date: new Date('2026-01-15T10:00:00'),
-    icon: 'flight_takeoff',
-    category: 'travel',
-    color: 'sky',
-    description: 'Annual vacation to Bali, Indonesia.',
-  },
-  {
-    id: '3',
-    name: "New Year's Eve",
-    date: new Date('2025-12-31'),
-    icon: 'celebration',
-    category: 'celebration',
-    color: 'indigo',
-    recurrence: 'yearly',
-  },
-  {
-    id: '4',
-    name: "Mom's Birthday",
-    date: new Date('2026-02-20'),
-    icon: 'cake',
-    category: 'birthday',
-    color: 'pink',
-    recurrence: 'yearly',
-  },
-];
+import { useTheme, useHolidays } from '../context';
 
 export function HolidayListScreen() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { holidays } = useHolidays();
+  
+  // Sort holidays by date (upcoming first)
+  const sortedHolidays = [...holidays].sort((a, b) => {
+    const now = new Date();
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    // Put past dates at the end
+    const aIsPast = dateA < now;
+    const bIsPast = dateB < now;
+    if (aIsPast && !bIsPast) return 1;
+    if (!aIsPast && bIsPast) return -1;
+    return dateA.getTime() - dateB.getTime();
+  });
 
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen">
@@ -99,11 +70,11 @@ export function HolidayListScreen() {
           
           {/* Holiday cards */}
           <div className="flex flex-col gap-4 px-6 pt-2">
-            {holidays.map((holiday, index) => (
+            {sortedHolidays.map((holiday, index) => (
               <HolidayCard 
                 key={holiday.id} 
                 holiday={holiday} 
-                variant={index === 0 ? 'featured' : index === holidays.length - 1 ? 'compact' : 'standard'}
+                variant={index === 0 ? 'featured' : index === sortedHolidays.length - 1 ? 'compact' : 'standard'}
               />
             ))}
           </div>
