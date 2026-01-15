@@ -69,6 +69,9 @@ export function HolidayListScreen() {
   const { theme, toggleTheme } = useTheme();
   const { holidays, clearAllHolidays } = useHolidays();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  const MAX_VISIBLE = 5;
   
   // Filter out past one-time events and sort by next occurrence date
   const visibleHolidays = holidays
@@ -138,14 +141,30 @@ export function HolidayListScreen() {
           
           {/* Holiday cards */}
           <div className="flex flex-col gap-4 px-6 pt-2">
-            {visibleHolidays.map((holiday, index) => (
+            {(isExpanded ? visibleHolidays : visibleHolidays.slice(0, MAX_VISIBLE)).map((holiday, index, arr) => (
               <HolidayCard 
                 key={holiday.id} 
                 holiday={holiday}
                 effectiveDate={holiday.effectiveDate}
-                variant={index === 0 ? 'featured' : index === visibleHolidays.length - 1 ? 'compact' : 'standard'}
+                variant={index === 0 ? 'featured' : index === arr.length - 1 ? 'compact' : 'standard'}
               />
             ))}
+            
+            {/* View More / View Less button */}
+            {visibleHolidays.length > MAX_VISIBLE && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center justify-center gap-2 py-3 text-primary dark:text-primary font-semibold text-sm active:scale-95 transition-transform"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {isExpanded ? 'expand_less' : 'expand_more'}
+                </span>
+                {isExpanded 
+                  ? 'View Less' 
+                  : `View ${visibleHolidays.length - MAX_VISIBLE} More`
+                }
+              </button>
+            )}
           </div>
           
           <div className="h-24"></div>
