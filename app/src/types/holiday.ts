@@ -8,6 +8,7 @@ export interface Holiday {
   recurrence?: 'none' | 'yearly' | 'monthly' | 'weekly';
   source?: string;
   color: 'emerald' | 'sky' | 'indigo' | 'teal' | 'pink' | 'orange';
+  reminder?: boolean; // Whether a reminder is set for this event
 }
 
 export interface CountdownTime {

@@ -112,28 +112,28 @@ export function HolidayListScreen() {
         <main className="flex-1 overflow-y-auto pb-32 no-scrollbar relative z-10">
           {/* Quick actions */}
           <div className="px-6 py-3">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex gap-2">
               <button 
                 onClick={() => navigate('/import')}
-                className="flex items-center gap-2 px-4 py-2.5 bg-sky-50 dark:bg-surface-dark text-sky-600 dark:text-primary rounded-full font-semibold text-sm border border-sky-100 dark:border-white/10 active:scale-95 transition-transform"
+                className="flex items-center gap-1.5 px-3 py-2 bg-sky-50 dark:bg-surface-dark text-sky-600 dark:text-primary rounded-full font-semibold text-xs border border-sky-100 dark:border-white/10 active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
+                <span className="material-symbols-outlined text-[16px]">calendar_add_on</span>
                 Import
               </button>
               <button 
                 onClick={() => navigate('/browse')}
-                className="flex items-center gap-2 px-4 py-2.5 bg-teal-50 dark:bg-surface-dark text-teal-600 dark:text-slate-300 rounded-full font-semibold text-sm border border-teal-100 dark:border-white/10 active:scale-95 transition-transform"
+                className="flex items-center gap-1.5 px-3 py-2 bg-teal-50 dark:bg-surface-dark text-teal-600 dark:text-slate-300 rounded-full font-semibold text-xs border border-teal-100 dark:border-white/10 active:scale-95 transition-transform"
               >
-                <span className="material-symbols-outlined text-[18px]">public</span>
+                <span className="material-symbols-outlined text-[16px]">public</span>
                 Browse
               </button>
               {holidays.length > 0 && (
                 <button 
                   onClick={() => setShowClearConfirm(true)}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-surface-dark text-red-500 dark:text-red-400 rounded-full font-semibold text-sm border border-red-100 dark:border-white/10 active:scale-95 transition-transform"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-red-50 dark:bg-surface-dark text-red-500 dark:text-red-400 rounded-full font-semibold text-xs border border-red-100 dark:border-white/10 active:scale-95 transition-transform"
                 >
-                  <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
-                  Clear All
+                  <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+                  Clear
                 </button>
               )}
             </div>

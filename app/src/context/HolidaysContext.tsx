@@ -15,6 +15,7 @@ const defaultHolidays: Holiday[] = [
     description: 'Christmas is an annual festival commemorating the birth of Jesus Christ.',
     recurrence: 'yearly',
     source: 'US Holidays',
+    reminder: true,
   },
   {
     id: '2',
@@ -24,6 +25,7 @@ const defaultHolidays: Holiday[] = [
     category: 'travel',
     color: 'sky',
     description: 'Annual vacation to Bali, Indonesia.',
+    reminder: true,
   },
   {
     id: '3',
@@ -42,6 +44,7 @@ const defaultHolidays: Holiday[] = [
     category: 'birthday',
     color: 'pink',
     recurrence: 'yearly',
+    reminder: true,
   },
 ];
 

@@ -178,13 +178,11 @@ export function HolidayCard({ holiday, effectiveDate, variant = 'standard' }: Ho
           </div>
         </div>
         
-        {/* Additional info row */}
-        {displayDate.getHours() !== 0 && (
+        {/* Reminder indicator */}
+        {holiday.reminder && (
           <div className="mt-3 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
-            <span className="material-symbols-outlined text-[16px]">schedule</span>
-            <span className="font-medium">
-              {displayDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}
-            </span>
+            <span className="material-symbols-outlined text-[16px]">notifications_active</span>
+            <span className="font-medium">Reminder set</span>
           </div>
         )}
       </div>
