@@ -98,7 +98,7 @@ export function HolidaysProvider({ children }: { children: ReactNode }) {
   const addHoliday = (holiday: Omit<Holiday, 'id'>) => {
     const newHoliday: Holiday = {
       ...holiday,
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
     };
     setHolidays(prev => [...prev, newHoliday]);
   };
