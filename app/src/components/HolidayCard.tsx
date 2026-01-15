@@ -87,6 +87,13 @@ export function HolidayCard({ holiday, effectiveDate, variant = 'standard' }: Ho
   };
 
   if (variant === 'featured') {
+    // Only show detailed countdown when event is within 7 days
+    const showDetailedCountdown = countdown.days <= 7;
+    // Calculate progress percentage (for events within 7 days)
+    const totalSeconds = 7 * 24 * 60 * 60; // 7 days in seconds
+    const remainingSeconds = countdown.days * 24 * 60 * 60 + countdown.hours * 60 * 60 + countdown.minutes * 60 + countdown.seconds;
+    const progressPercent = Math.max(0, Math.min(100, ((totalSeconds - remainingSeconds) / totalSeconds) * 100));
+    
     return (
       <div 
         onClick={handleClick}
@@ -94,7 +101,7 @@ export function HolidayCard({ holiday, effectiveDate, variant = 'standard' }: Ho
       >
         <div className={`absolute -right-8 -top-8 w-40 h-40 ${colors.glow} rounded-full blur-3xl pointer-events-none dark:opacity-50`}></div>
         <div className="relative p-5">
-          <div className="flex items-start gap-4 mb-4">
+          <div className={`flex items-start gap-4 ${showDetailedCountdown ? 'mb-4' : ''}`}>
             <div className={`w-14 h-14 flex shrink-0 items-center justify-center ${colors.iconBg} rounded-2xl ${colors.iconText}`}>
               <span className="material-symbols-outlined text-[28px]">{holiday.icon}</span>
             </div>
@@ -107,17 +114,22 @@ export function HolidayCard({ holiday, effectiveDate, variant = 'standard' }: Ho
             </div>
           </div>
           
-          {/* Countdown timer row */}
-          <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
-            <span className="material-symbols-outlined text-[16px]">schedule</span>
-            <span className="font-mono font-semibold">
-              {countdown.hours.toString().padStart(2, '0')}h {countdown.minutes.toString().padStart(2, '0')}m {countdown.seconds.toString().padStart(2, '0')}s
-            </span>
-            {/* Progress bar */}
-            <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full ml-2 overflow-hidden">
-              <div className="h-full bg-primary rounded-full w-[75%] transition-all"></div>
+          {/* Countdown timer row - only show when event is within 7 days */}
+          {showDetailedCountdown && (
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
+              <span className="material-symbols-outlined text-[16px]">schedule</span>
+              <span className="font-mono font-semibold">
+                {countdown.hours.toString().padStart(2, '0')}h {countdown.minutes.toString().padStart(2, '0')}m {countdown.seconds.toString().padStart(2, '0')}s
+              </span>
+              {/* Progress bar */}
+              <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full ml-2 overflow-hidden">
+                <div 
+                  className="h-full bg-primary rounded-full transition-all"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     );
