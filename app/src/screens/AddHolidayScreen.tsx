@@ -1,11 +1,255 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer } from '../components';
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
+
+const ITEM_HEIGHT = 44;
+
+interface PickerWheelProps {
+  items: string[];
+  selectedIndex: number;
+  onChange: (index: number) => void;
+}
+
+function PickerWheel({ items, selectedIndex, onChange }: PickerWheelProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const startY = useRef(0);
+  const startScrollTop = useRef(0);
+  const velocity = useRef(0);
+  const lastY = useRef(0);
+  const lastTime = useRef(0);
+  const animationFrame = useRef<number>();
+
+  const scrollToIndex = useCallback((index: number, smooth = true) => {
+    if (containerRef.current) {
+      const targetScroll = index * ITEM_HEIGHT;
+      const currentScroll = containerRef.current.scrollTop;
+      // Only scroll if position differs significantly
+      if (Math.abs(currentScroll - targetScroll) > ITEM_HEIGHT / 2) {
+        if (smooth) {
+          containerRef.current.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        } else {
+          containerRef.current.scrollTop = targetScroll;
+        }
+      }
+    }
+  }, []);
+
+  // Scroll to selected index on mount and when it changes externally
+  const isInitialMount = useRef(true);
+  useEffect(() => {
+    if (isInitialMount.current) {
+      // On initial mount, scroll without animation
+      if (containerRef.current) {
+        containerRef.current.scrollTop = selectedIndex * ITEM_HEIGHT;
+      }
+      isInitialMount.current = false;
+    } else {
+      // On subsequent changes (e.g., day clamping), scroll with animation
+      scrollToIndex(selectedIndex, true);
+    }
+  }, [selectedIndex, scrollToIndex]);
+
+  const handleScroll = useCallback(() => {
+    if (containerRef.current && !isDragging) {
+      const scrollTop = containerRef.current.scrollTop;
+      const newIndex = Math.round(scrollTop / ITEM_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(items.length - 1, newIndex));
+      if (clampedIndex !== selectedIndex) {
+        onChange(clampedIndex);
+      }
+    }
+  }, [isDragging, items.length, selectedIndex, onChange]);
+
+  const snapToNearest = useCallback(() => {
+    if (containerRef.current) {
+      const scrollTop = containerRef.current.scrollTop;
+      const newIndex = Math.round(scrollTop / ITEM_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(items.length - 1, newIndex));
+      scrollToIndex(clampedIndex);
+      if (clampedIndex !== selectedIndex) {
+        onChange(clampedIndex);
+      }
+    }
+  }, [items.length, selectedIndex, onChange, scrollToIndex]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true);
+    startY.current = e.touches[0].clientY;
+    startScrollTop.current = containerRef.current?.scrollTop || 0;
+    lastY.current = e.touches[0].clientY;
+    lastTime.current = Date.now();
+    velocity.current = 0;
+    if (animationFrame.current) {
+      cancelAnimationFrame(animationFrame.current);
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    
+    const currentY = e.touches[0].clientY;
+    const deltaY = startY.current - currentY;
+    const currentTime = Date.now();
+    const timeDelta = currentTime - lastTime.current;
+    
+    if (timeDelta > 0) {
+      velocity.current = (lastY.current - currentY) / timeDelta;
+    }
+    
+    lastY.current = currentY;
+    lastTime.current = currentTime;
+    
+    containerRef.current.scrollTop = startScrollTop.current + deltaY;
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    
+    // Apply momentum scrolling
+    if (Math.abs(velocity.current) > 0.5 && containerRef.current) {
+      const momentum = velocity.current * 150;
+      const targetScroll = containerRef.current.scrollTop + momentum;
+      const targetIndex = Math.round(targetScroll / ITEM_HEIGHT);
+      const clampedIndex = Math.max(0, Math.min(items.length - 1, targetIndex));
+      scrollToIndex(clampedIndex);
+      onChange(clampedIndex);
+    } else {
+      snapToNearest();
+    }
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true);
+    startY.current = e.clientY;
+    startScrollTop.current = containerRef.current?.scrollTop || 0;
+    lastY.current = e.clientY;
+    lastTime.current = Date.now();
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    
+    const currentY = e.clientY;
+    const deltaY = startY.current - currentY;
+    const currentTime = Date.now();
+    const timeDelta = currentTime - lastTime.current;
+    
+    if (timeDelta > 0) {
+      velocity.current = (lastY.current - currentY) / timeDelta;
+    }
+    
+    lastY.current = currentY;
+    lastTime.current = currentTime;
+    
+    containerRef.current.scrollTop = startScrollTop.current + deltaY;
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      snapToNearest();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      snapToNearest();
+    }
+  };
+
+  const handleItemClick = (index: number) => {
+    scrollToIndex(index);
+    onChange(index);
+  };
+
+  return (
+    <div 
+      ref={containerRef}
+      className="h-[220px] overflow-y-auto no-scrollbar cursor-grab active:cursor-grabbing select-none"
+      style={{ scrollSnapType: 'y mandatory' }}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseLeave}
+      onScroll={handleScroll}
+    >
+      {/* Top padding */}
+      <div style={{ height: ITEM_HEIGHT * 2 }} />
+      
+      {items.map((item, index) => {
+        const distance = Math.abs(index - selectedIndex);
+        const isSelected = index === selectedIndex;
+        
+        return (
+          <div
+            key={index}
+            className={`
+              flex items-center justify-center transition-all duration-150
+              ${isSelected 
+                ? 'text-joy-orange dark:text-orange-400 font-bold scale-110' 
+                : distance === 1 
+                  ? 'text-slate-400 dark:text-slate-500 font-medium opacity-70' 
+                  : 'text-slate-300 dark:text-slate-600 font-medium opacity-40'
+              }
+            `}
+            style={{ 
+              height: ITEM_HEIGHT,
+              scrollSnapAlign: 'center',
+              fontSize: isSelected ? '18px' : '16px',
+              transform: `scale(${isSelected ? 1.1 : distance === 1 ? 0.95 : 0.9})`,
+            }}
+            onClick={() => handleItemClick(index)}
+          >
+            {item}
+          </div>
+        );
+      })}
+      
+      {/* Bottom padding */}
+      <div style={{ height: ITEM_HEIGHT * 2 }} />
+    </div>
+  );
+}
+
+function getDaysInMonth(month: number, year: number): number {
+  return new Date(year, month + 1, 0).getDate();
+}
 
 export function AddHolidayScreen() {
   const navigate = useNavigate();
   const [name, setName] = useState("Mom's Birthday");
   const [allDay, setAllDay] = useState(true);
+  
+  // Date state
+  const currentDate = new Date();
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedDay, setSelectedDay] = useState(currentDate.getDate() - 1); // 0-indexed
+  const [selectedYear, setSelectedYear] = useState(0); // Index in years array
+  
+  // Generate years array (current year + 10 years)
+  const currentYear = currentDate.getFullYear();
+  const years = Array.from({ length: 11 }, (_, i) => (currentYear + i).toString());
+  
+  // Generate days based on selected month and year
+  const daysInMonth = getDaysInMonth(selectedMonth, parseInt(years[selectedYear]));
+  const days = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
+  
+  // Adjust day if it exceeds days in month
+  useEffect(() => {
+    if (selectedDay >= daysInMonth) {
+      setSelectedDay(daysInMonth - 1);
+    }
+  }, [selectedMonth, selectedYear, daysInMonth, selectedDay]);
 
   return (
     <div className="bg-sky-50 dark:bg-background-dark min-h-screen">
@@ -74,32 +318,41 @@ export function AddHolidayScreen() {
               </div>
             </div>
             
-            {/* Date picker wheels simulation */}
+            {/* Date picker wheels */}
             <div className="relative bg-white dark:bg-background-dark py-2">
-              <div className="w-full h-44 relative flex justify-center overflow-hidden">
+              <div className="w-full h-[220px] relative flex justify-center overflow-hidden">
+                {/* Selection highlight */}
                 <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-11 bg-gradient-to-r from-orange-50 via-yellow-50 to-orange-50 dark:from-slate-700/30 dark:to-slate-700/30 rounded-lg pointer-events-none z-0 mx-6 border-y border-orange-200/50 dark:border-slate-600/50"></div>
-                <div className="flex w-full justify-around z-10 text-center px-4">
-                  <div className="w-1/3 space-y-4 pt-14 text-[17px]">
-                    <div className="text-sky-300 scale-90 opacity-60 font-medium">October</div>
-                    <div className="text-joy-orange dark:text-orange-400 font-bold scale-110">November</div>
-                    <div className="text-sky-300 scale-90 opacity-60 font-medium">December</div>
-                    <div className="text-sky-300 scale-90 opacity-40 font-medium">January</div>
+                
+                {/* Picker wheels */}
+                <div className="flex w-full z-10 text-center px-4">
+                  <div className="w-1/3">
+                    <PickerWheel
+                      items={MONTHS}
+                      selectedIndex={selectedMonth}
+                      onChange={setSelectedMonth}
+                    />
                   </div>
-                  <div className="w-1/3 space-y-4 pt-14 text-[17px]">
-                    <div className="text-sky-300 scale-90 opacity-60 font-medium">23</div>
-                    <div className="text-joy-orange dark:text-orange-400 font-bold scale-110">24</div>
-                    <div className="text-sky-300 scale-90 opacity-60 font-medium">25</div>
-                    <div className="text-sky-300 scale-90 opacity-40 font-medium">26</div>
+                  <div className="w-1/3">
+                    <PickerWheel
+                      items={days}
+                      selectedIndex={selectedDay}
+                      onChange={setSelectedDay}
+                    />
                   </div>
-                  <div className="w-1/3 space-y-4 pt-14 text-[17px]">
-                    <div className="text-sky-300 scale-90 opacity-60 font-medium">2024</div>
-                    <div className="text-joy-orange dark:text-orange-400 font-bold scale-110">2025</div>
-                    <div className="text-sky-300 scale-90 opacity-60 font-medium">2026</div>
-                    <div className="text-sky-300 scale-90 opacity-40 font-medium">2027</div>
+                  <div className="w-1/3">
+                    <PickerWheel
+                      items={years}
+                      selectedIndex={selectedYear}
+                      onChange={setSelectedYear}
+                    />
                   </div>
                 </div>
-                <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-white via-white/90 to-transparent dark:from-background-dark dark:via-background-dark/90 pointer-events-none z-20"></div>
-                <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-background-dark dark:via-background-dark/90 pointer-events-none z-20"></div>
+                
+                {/* Top fade gradient */}
+                <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white via-white/90 to-transparent dark:from-background-dark dark:via-background-dark/90 pointer-events-none z-20"></div>
+                {/* Bottom fade gradient */}
+                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white via-white/90 to-transparent dark:from-background-dark dark:via-background-dark/90 pointer-events-none z-20"></div>
               </div>
             </div>
           </div>
