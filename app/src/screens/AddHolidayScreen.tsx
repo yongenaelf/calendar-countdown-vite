@@ -276,26 +276,25 @@ export function AddHolidayScreen() {
   }, [selectedMonth, selectedYear, daysInMonth, selectedDay]);
 
   return (
-    <div className="bg-sky-50 dark:bg-background-dark min-h-screen">
-      <MobileContainer className="bg-sky-50 dark:bg-background-dark">
-        {/* Header */}
-        <header className="sticky top-0 z-50 flex items-center justify-between bg-sky-50/90 dark:bg-background-dark/80 backdrop-blur-md px-5 py-4 border-b border-sky-100 dark:border-slate-800 transition-colors">
-          <button 
-            onClick={() => navigate(-1)}
-            className="text-slate-500 hover:text-sky-600 dark:hover:text-slate-300 text-[17px] font-medium leading-normal tracking-wide shrink-0 active:opacity-70 transition-colors"
-          >
-            Cancel
-          </button>
-          <h2 className="text-slate-800 dark:text-white text-[17px] font-bold leading-tight tracking-tight text-center flex-1">
-            New Celebration ✨
-          </h2>
-          <button className="bg-joy-orange text-white px-5 py-1.5 rounded-full text-[15px] font-bold shadow-lg shadow-joy-orange/30 hover:shadow-joy-orange/50 active:scale-95 transition-all shrink-0">
-            Add
-          </button>
-        </header>
-        
-        {/* Main content */}
-        <main className="flex-1 w-full px-5 py-6 space-y-8 pb-32 overflow-y-auto no-scrollbar">
+    <div className="bg-sky-50 dark:bg-background-dark min-h-screen max-w-md mx-auto shadow-2xl dark:shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+      {/* Fixed Header */}
+      <header className="sticky top-0 z-50 flex items-center justify-between bg-sky-50/95 dark:bg-background-dark/95 backdrop-blur-md px-5 py-4 border-b border-sky-100 dark:border-slate-800 transition-colors">
+        <button 
+          onClick={() => navigate(-1)}
+          className="text-slate-500 hover:text-sky-600 dark:hover:text-slate-300 text-[17px] font-medium leading-normal tracking-wide shrink-0 active:opacity-70 transition-colors"
+        >
+          Cancel
+        </button>
+        <h2 className="text-slate-800 dark:text-white text-[17px] font-bold leading-tight tracking-tight text-center flex-1">
+          New Celebration ✨
+        </h2>
+        <button className="bg-joy-orange text-white px-5 py-1.5 rounded-full text-[15px] font-bold shadow-lg shadow-joy-orange/30 hover:shadow-joy-orange/50 active:scale-95 transition-all shrink-0">
+          Add
+        </button>
+      </header>
+      
+      {/* Main content */}
+      <main className="w-full px-5 pb-32 space-y-8">
           {/* Icon and name */}
           <div className="flex flex-col items-center justify-center space-y-6 pt-2">
             <button className="group relative h-32 w-32 rounded-full bg-white dark:bg-surface-dark shadow-xl shadow-sky-200/50 dark:shadow-black/20 flex items-center justify-center transition-transform active:scale-95 border-4 border-white dark:border-surface-dark ring-4 ring-yellow-100 dark:ring-transparent">
@@ -587,7 +586,6 @@ export function AddHolidayScreen() {
             </div>
           </div>
         )}
-      </MobileContainer>
     </div>
   );
 }
