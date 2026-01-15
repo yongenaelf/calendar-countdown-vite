@@ -23,7 +23,7 @@ function PickerWheel({ items, selectedIndex, onChange }: PickerWheelProps) {
   const velocity = useRef(0);
   const lastY = useRef(0);
   const lastTime = useRef(0);
-  const animationFrame = useRef<number>();
+  const animationFrame = useRef<number | undefined>(undefined);
 
   const scrollToIndex = useCallback((index: number, smooth = true) => {
     if (containerRef.current) {
