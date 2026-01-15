@@ -51,6 +51,7 @@ interface HolidaysContextType {
   updateHoliday: (id: string, holiday: Partial<Holiday>) => void;
   deleteHoliday: (id: string) => void;
   getHoliday: (id: string) => Holiday | undefined;
+  clearAllHolidays: () => void;
 }
 
 const HolidaysContext = createContext<HolidaysContextType | undefined>(undefined);
@@ -116,8 +117,12 @@ export function HolidaysProvider({ children }: { children: ReactNode }) {
     return holidays.find(h => h.id === id);
   };
 
+  const clearAllHolidays = () => {
+    setHolidays([]);
+  };
+
   return (
-    <HolidaysContext.Provider value={{ holidays, addHoliday, updateHoliday, deleteHoliday, getHoliday }}>
+    <HolidaysContext.Provider value={{ holidays, addHoliday, updateHoliday, deleteHoliday, getHoliday, clearAllHolidays }}>
       {children}
     </HolidaysContext.Provider>
   );

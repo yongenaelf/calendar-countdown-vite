@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer, IconButton, HolidayCard } from '../components';
 import { useTheme, useHolidays } from '../context';
@@ -66,7 +67,8 @@ function shouldShowHoliday(holiday: Holiday): boolean {
 export function HolidayListScreen() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
-  const { holidays } = useHolidays();
+  const { holidays, clearAllHolidays } = useHolidays();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   
   // Filter out past one-time events and sort by next occurrence date
   const visibleHolidays = holidays
@@ -122,6 +124,15 @@ export function HolidayListScreen() {
                 <span className="material-symbols-outlined text-[18px]">public</span>
                 Public Holidays
               </button>
+              {holidays.length > 0 && (
+                <button 
+                  onClick={() => setShowClearConfirm(true)}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-surface-dark text-red-500 dark:text-red-400 rounded-full font-semibold text-sm border border-red-100 dark:border-white/10 active:scale-95 transition-transform whitespace-nowrap"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete_sweep</span>
+                  Clear All
+                </button>
+              )}
             </div>
           </div>
           
@@ -154,6 +165,51 @@ export function HolidayListScreen() {
         <div className="absolute bottom-0 w-full h-1 bg-transparent pointer-events-none">
           <div className="mx-auto w-1/3 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mb-2"></div>
         </div>
+
+        {/* Clear All Confirmation Modal */}
+        {showClearConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setShowClearConfirm(false)}
+            />
+            
+            {/* Modal */}
+            <div className="relative bg-white dark:bg-surface-dark rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center mb-4">
+                  <span className="material-symbols-outlined text-3xl text-red-500">warning</span>
+                </div>
+                
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
+                  Clear All Events?
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-6">
+                  This will permanently delete all {holidays.length} events. This action cannot be undone.
+                </p>
+                
+                <div className="flex gap-3 w-full">
+                  <button
+                    onClick={() => setShowClearConfirm(false)}
+                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold active:scale-95 transition-transform"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => {
+                      clearAllHolidays();
+                      setShowClearConfirm(false);
+                    }}
+                    className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl font-semibold active:scale-95 transition-transform"
+                  >
+                    Delete All
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </MobileContainer>
     </div>
   );
