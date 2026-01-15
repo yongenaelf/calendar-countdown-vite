@@ -300,7 +300,7 @@ export function BrowseHolidaysScreen() {
             category: 'celebration',
             color: getRandomHolidayColor(),
             description: holiday.localName !== holiday.name ? `Local name: ${holiday.localName}` : undefined,
-            recurrence: 'yearly',
+            recurrence: 'none', // Don't auto-recur as some holidays (e.g., Chinese New Year, Easter) don't fall on the same date every year
             source: country?.name || countryCode,
           });
         }
