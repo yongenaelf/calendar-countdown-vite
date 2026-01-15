@@ -225,10 +225,21 @@ function getDaysInMonth(month: number, year: number): number {
   return new Date(year, month + 1, 0).getDate();
 }
 
+const REPEAT_OPTIONS = [
+  { value: 'never', label: 'Never', description: 'One-time celebration' },
+  { value: 'yearly', label: 'Yearly', description: 'Same date every year' },
+  { value: 'monthly', label: 'Monthly', description: 'Same day every month' },
+  { value: 'weekly', label: 'Weekly', description: 'Same day every week' },
+] as const;
+
+type RepeatOption = typeof REPEAT_OPTIONS[number]['value'];
+
 export function AddHolidayScreen() {
   const navigate = useNavigate();
   const [name, setName] = useState("Mom's Birthday");
   const [allDay, setAllDay] = useState(true);
+  const [repeatOption, setRepeatOption] = useState<RepeatOption>('yearly');
+  const [showRepeatSheet, setShowRepeatSheet] = useState(false);
   
   // Date state
   const currentDate = new Date();
@@ -363,7 +374,10 @@ export function AddHolidayScreen() {
               The Fun Details <span className="text-lg">🎡</span>
             </h3>
             <div className="bg-white dark:bg-surface-dark rounded-3xl shadow-sm border border-sky-100 dark:border-slate-800/50 overflow-hidden">
-              <div className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-sky-50 dark:active:bg-slate-700/30 transition-colors group">
+              <button 
+                onClick={() => setShowRepeatSheet(true)}
+                className="w-full flex items-center justify-between px-5 py-4 cursor-pointer active:bg-sky-50 dark:active:bg-slate-700/30 transition-colors group"
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <span className="material-symbols-outlined text-[20px]">update</span>
@@ -371,10 +385,12 @@ export function AddHolidayScreen() {
                   <span className="text-[16px] font-semibold text-slate-900 dark:text-white">Make it a tradition?</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[15px] text-joy-orange font-medium">Yearly</span>
+                  <span className={`text-[15px] font-medium ${repeatOption === 'never' ? 'text-slate-400' : 'text-joy-orange'}`}>
+                    {REPEAT_OPTIONS.find(o => o.value === repeatOption)?.label}
+                  </span>
                   <span className="material-symbols-outlined text-slate-400 text-xl">chevron_right</span>
                 </div>
-              </div>
+              </button>
               <div className="h-px w-full bg-sky-100 dark:bg-slate-800 ml-16"></div>
               <div className="flex items-center justify-between px-5 py-4 cursor-pointer active:bg-sky-50 dark:active:bg-slate-700/30 transition-colors group">
                 <div className="flex items-center gap-3">
@@ -410,6 +426,74 @@ export function AddHolidayScreen() {
             </p>
           </div>
         </main>
+        
+        {/* Repeat Option Bottom Sheet */}
+        {showRepeatSheet && (
+          <div className="fixed inset-0 z-[100]">
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+              onClick={() => setShowRepeatSheet(false)}
+            />
+            
+            {/* Sheet */}
+            <div className="absolute bottom-0 left-0 right-0 bg-white dark:bg-surface-dark rounded-t-[20px] animate-slide-up shadow-2xl">
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-10 h-1 bg-slate-300 dark:bg-slate-600 rounded-full" />
+              </div>
+              
+              {/* Header */}
+              <div className="px-5 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white text-center">
+                  Make it a tradition? 🎊
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 text-center mt-1">
+                  How often should we celebrate?
+                </p>
+              </div>
+              
+              {/* Options */}
+              <div className="p-4 space-y-2">
+                {REPEAT_OPTIONS.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => {
+                      setRepeatOption(option.value);
+                      setShowRepeatSheet(false);
+                    }}
+                    className={`w-full flex items-center justify-between px-4 py-4 rounded-2xl transition-all active:scale-[0.98] ${
+                      repeatOption === option.value
+                        ? 'bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-500/10 dark:to-yellow-500/10 ring-2 ring-joy-orange/50'
+                        : 'bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800'
+                    }`}
+                  >
+                    <div className="flex flex-col items-start">
+                      <span className={`text-[16px] font-semibold ${
+                        repeatOption === option.value 
+                          ? 'text-joy-orange' 
+                          : 'text-slate-900 dark:text-white'
+                      }`}>
+                        {option.label}
+                      </span>
+                      <span className="text-[13px] text-slate-500 dark:text-slate-400">
+                        {option.description}
+                      </span>
+                    </div>
+                    {repeatOption === option.value && (
+                      <div className="h-8 w-8 rounded-full bg-joy-orange flex items-center justify-center">
+                        <span className="material-symbols-outlined text-white text-[18px]">check</span>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+              
+              {/* Safe area padding */}
+              <div className="h-8" />
+            </div>
+          </div>
+        )}
       </MobileContainer>
     </div>
   );
