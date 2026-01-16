@@ -6,6 +6,13 @@ import type { Holiday } from '../types/holiday';
 
 const LEAVE_STORAGE_KEY = 'leave-planner-total-days';
 const SELECTED_STORAGE_KEY = 'leave-planner-selected';
+const EXTENSIONS_STORAGE_KEY = 'leave-planner-extensions';
+
+// Extension tracking for each opportunity (days added before/after)
+interface DateExtension {
+  before: number; // Days added before the original start
+  after: number;  // Days added after the original end
+}
 
 // Day names for display
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -330,6 +337,12 @@ export function LeavePlannerScreen() {
     return saved ? new Set(JSON.parse(saved)) : new Set();
   });
   
+  // Date extensions per opportunity (days added before/after original range)
+  const [extensions, setExtensions] = useState<Record<string, DateExtension>>(() => {
+    const saved = localStorage.getItem(EXTENSIONS_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  });
+  
   // Build set of all holiday dates for quick lookup
   const allHolidayDates = useMemo(() => {
     const dates = new Set<string>();
@@ -345,19 +358,56 @@ export function LeavePlannerScreen() {
     return findLongWeekendOpportunities(holidays, allHolidayDates);
   }, [holidays, allHolidayDates]);
   
+  // Get extension for an opportunity
+  const getExtension = (oppId: string): DateExtension => {
+    return extensions[oppId] ?? { before: 0, after: 0 };
+  };
+  
+  // Get effective date range for an opportunity
+  const getEffectiveDateRange = (opp: LongWeekendOpportunity): { start: Date; end: Date } => {
+    const ext = getExtension(opp.id);
+    return {
+      start: addDays(opp.startDate, -ext.before),
+      end: addDays(opp.endDate, ext.after),
+    };
+  };
+  
+  // Count leave days in a date range (excluding weekends and holidays)
+  const countLeaveDaysInRange = (start: Date, end: Date, holidayDate: Date): number => {
+    let count = 0;
+    let current = new Date(start);
+    while (current <= end) {
+      if (!isWeekend(current) && !isSameDay(current, holidayDate)) {
+        count++;
+      }
+      current = addDays(current, 1);
+    }
+    return count;
+  };
+  
+  // Get effective leave days for an opportunity
+  const getEffectiveLeaveDays = (opp: LongWeekendOpportunity): number => {
+    const { start, end } = getEffectiveDateRange(opp);
+    return countLeaveDaysInRange(start, end, opp.holidayDate);
+  };
+  
   // Calculate consumed leave days from selected opportunities
   const consumedLeaveDays = useMemo(() => {
     return opportunities
       .filter(o => selectedOpportunities.has(o.id))
-      .reduce((sum, o) => sum + o.leaveDays.length, 0);
-  }, [opportunities, selectedOpportunities]);
+      .reduce((sum, o) => sum + getEffectiveLeaveDays(o), 0);
+  }, [opportunities, selectedOpportunities, extensions]);
   
   // Calculate total days off from selected opportunities
   const totalSelectedDaysOff = useMemo(() => {
     return opportunities
       .filter(o => selectedOpportunities.has(o.id))
-      .reduce((sum, o) => sum + o.totalDaysOff, 0);
-  }, [opportunities, selectedOpportunities]);
+      .reduce((sum, o) => {
+        const { start, end } = getEffectiveDateRange(o);
+        const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+        return sum + totalDays;
+      }, 0);
+  }, [opportunities, selectedOpportunities, extensions]);
   
   const remainingLeaveDays = totalLeaveDays - consumedLeaveDays;
   const progressPercent = totalLeaveDays > 0 ? (consumedLeaveDays / totalLeaveDays) * 100 : 0;
@@ -374,6 +424,13 @@ export function LeavePlannerScreen() {
       const next = new Set(prev);
       if (next.has(oppId)) {
         next.delete(oppId);
+        // Clean up extensions when deselecting
+        setExtensions(prevExt => {
+          const nextExt = { ...prevExt };
+          delete nextExt[oppId];
+          localStorage.setItem(EXTENSIONS_STORAGE_KEY, JSON.stringify(nextExt));
+          return nextExt;
+        });
       } else {
         // Only allow selection if enough leave days remaining
         if (remainingLeaveDays >= leaveDaysRequired) {
@@ -381,6 +438,43 @@ export function LeavePlannerScreen() {
         }
       }
       localStorage.setItem(SELECTED_STORAGE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+  
+  // Extend the date range (before or after)
+  const extendRange = (oppId: string, direction: 'before' | 'after') => {
+    // Check if we have leave days remaining (we might be adding a weekday)
+    if (remainingLeaveDays <= 0) return;
+    
+    setExtensions(prev => {
+      const current = prev[oppId] ?? { before: 0, after: 0 };
+      const next = {
+        ...prev,
+        [oppId]: {
+          ...current,
+          [direction]: current[direction] + 1,
+        },
+      };
+      localStorage.setItem(EXTENSIONS_STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+  
+  // Shrink the date range (from before or after)
+  const shrinkRange = (oppId: string, direction: 'before' | 'after') => {
+    setExtensions(prev => {
+      const current = prev[oppId] ?? { before: 0, after: 0 };
+      if (current[direction] <= 0) return prev;
+      
+      const next = {
+        ...prev,
+        [oppId]: {
+          ...current,
+          [direction]: current[direction] - 1,
+        },
+      };
+      localStorage.setItem(EXTENSIONS_STORAGE_KEY, JSON.stringify(next));
       return next;
     });
   };
@@ -575,45 +669,181 @@ export function LeavePlannerScreen() {
                     <div className="bg-gradient-to-br from-primary/5 to-indigo-500/5 dark:from-primary/10 dark:to-indigo-500/10 rounded-2xl border-2 border-primary/20 dark:border-primary/30 overflow-hidden">
                       {selectedOps.map((opp, index) => {
                         const isLast = index === selectedOps.length - 1;
+                        const { start: effectiveStart, end: effectiveEnd } = getEffectiveDateRange(opp);
+                        const effectiveLeaveDays = getEffectiveLeaveDays(opp);
+                        const totalDays = Math.ceil((effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                        
+                        // Build array of days to display
+                        const days: Array<{
+                          date: Date;
+                          type: 'holiday' | 'leave' | 'weekend' | 'extended-before' | 'extended-after';
+                          isExtended: boolean;
+                        }> = [];
+                        
+                        for (let i = 0; i < totalDays; i++) {
+                          const date = addDays(effectiveStart, i);
+                          const isHoliday = isSameDay(date, opp.holidayDate);
+                          const isWeekendDay = isWeekend(date);
+                          const isBeforeOriginal = date < opp.startDate;
+                          const isAfterOriginal = date > opp.endDate;
+                          
+                          let type: 'holiday' | 'leave' | 'weekend' | 'extended-before' | 'extended-after';
+                          if (isHoliday) {
+                            type = 'holiday';
+                          } else if (isWeekendDay) {
+                            type = 'weekend';
+                          } else if (isBeforeOriginal) {
+                            type = 'extended-before';
+                          } else if (isAfterOriginal) {
+                            type = 'extended-after';
+                          } else {
+                            type = 'leave';
+                          }
+                          
+                          days.push({
+                            date,
+                            type,
+                            isExtended: isBeforeOriginal || isAfterOriginal,
+                          });
+                        }
                         
                         return (
                           <div 
                             key={opp.id}
-                            onClick={() => toggleOpportunity(opp.id, opp.leaveDays.length)}
                             className={`
-                              flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-primary/10 transition-colors
+                              px-4 py-3 transition-colors
                               ${!isLast ? 'border-b border-primary/10 dark:border-primary/20' : ''}
                             `}
                           >
-                            {/* Check icon */}
-                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
-                              <span className="material-symbols-outlined text-white text-sm">check</span>
+                            {/* Header row */}
+                            <div className="flex items-center gap-3 mb-3">
+                              {/* Remove button */}
+                              <button
+                                onClick={() => toggleOpportunity(opp.id, opp.leaveDays.length)}
+                                className="w-6 h-6 rounded-full bg-red-500 flex items-center justify-center shrink-0 active:scale-95 transition-transform hover:bg-red-600"
+                              >
+                                <span className="material-symbols-outlined text-white text-sm">close</span>
+                              </button>
+                              
+                              {/* Holiday info */}
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">
+                                  {opp.holiday.name}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                  {formatDateRange(effectiveStart, effectiveEnd)}
+                                </p>
+                              </div>
+                              
+                              {/* Stats */}
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 rounded">
+                                  {effectiveLeaveDays}L
+                                </span>
+                                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                  {totalDays}D
+                                </span>
+                              </div>
                             </div>
                             
-                            {/* Holiday info */}
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">
-                                {opp.holiday.name}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400">
-                                {formatDateRange(opp.startDate, opp.endDate)}
-                              </p>
+                            {/* Day circles visualization */}
+                            <div className="flex items-center justify-center gap-1 flex-wrap py-2">
+                              {/* Add before button (dotted circle) */}
+                              <button
+                                onClick={() => extendRange(opp.id, 'before')}
+                                disabled={remainingLeaveDays <= 0}
+                                className="w-8 h-8 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Add day before"
+                              >
+                                <span className="material-symbols-outlined text-base">add</span>
+                              </button>
+                              
+                              {/* Day circles */}
+                              {days.map((day, i) => {
+                                const dayNum = day.date.getDate();
+                                const canRemove = day.isExtended && (day.type === 'extended-before' || day.type === 'extended-after');
+                                
+                                // Color based on type
+                                let bgColor = '';
+                                let textColor = '';
+                                let borderColor = '';
+                                
+                                switch (day.type) {
+                                  case 'holiday':
+                                    bgColor = 'bg-primary';
+                                    textColor = 'text-white';
+                                    break;
+                                  case 'leave':
+                                    bgColor = 'bg-amber-400 dark:bg-amber-500';
+                                    textColor = 'text-white';
+                                    break;
+                                  case 'weekend':
+                                    bgColor = 'bg-emerald-100 dark:bg-emerald-500/30';
+                                    textColor = 'text-emerald-700 dark:text-emerald-300';
+                                    break;
+                                  case 'extended-before':
+                                  case 'extended-after':
+                                    if (isWeekend(day.date)) {
+                                      bgColor = 'bg-emerald-100 dark:bg-emerald-500/30';
+                                      textColor = 'text-emerald-700 dark:text-emerald-300';
+                                      borderColor = 'ring-2 ring-emerald-300 dark:ring-emerald-500/50';
+                                    } else {
+                                      bgColor = 'bg-amber-200 dark:bg-amber-500/50';
+                                      textColor = 'text-amber-800 dark:text-amber-200';
+                                      borderColor = 'ring-2 ring-amber-400 dark:ring-amber-400/50';
+                                    }
+                                    break;
+                                }
+                                
+                                return (
+                                  <button
+                                    key={i}
+                                    onClick={() => {
+                                      if (day.type === 'extended-before') {
+                                        shrinkRange(opp.id, 'before');
+                                      } else if (day.type === 'extended-after') {
+                                        shrinkRange(opp.id, 'after');
+                                      }
+                                    }}
+                                    disabled={!canRemove}
+                                    className={`
+                                      w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all
+                                      ${bgColor} ${textColor} ${borderColor}
+                                      ${canRemove ? 'cursor-pointer hover:opacity-70 active:scale-95' : 'cursor-default'}
+                                    `}
+                                    title={`${shortDayNames[day.date.getDay()]} ${day.date.toLocaleDateString()}${canRemove ? ' (click to remove)' : ''}`}
+                                  >
+                                    {dayNum}
+                                  </button>
+                                );
+                              })}
+                              
+                              {/* Add after button (dotted circle) */}
+                              <button
+                                onClick={() => extendRange(opp.id, 'after')}
+                                disabled={remainingLeaveDays <= 0}
+                                className="w-8 h-8 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500 hover:border-primary hover:text-primary dark:hover:border-primary dark:hover:text-primary transition-colors active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed"
+                                title="Add day after"
+                              >
+                                <span className="material-symbols-outlined text-base">add</span>
+                              </button>
                             </div>
                             
-                            {/* Stats */}
-                            <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 rounded">
-                                {opp.leaveDays.length}L
-                              </span>
-                              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                                {opp.totalDaysOff}D
-                              </span>
+                            {/* Legend */}
+                            <div className="flex items-center justify-center gap-3 mt-2 text-[10px] text-slate-500 dark:text-slate-400">
+                              <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 rounded-full bg-primary"></div>
+                                <span>Holiday</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 rounded-full bg-amber-400 dark:bg-amber-500"></div>
+                                <span>Leave</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <div className="w-3 h-3 rounded-full bg-emerald-100 dark:bg-emerald-500/30"></div>
+                                <span>Weekend</span>
+                              </div>
                             </div>
-                            
-                            {/* Remove hint */}
-                            <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-lg">
-                              close
-                            </span>
                           </div>
                         );
                       })}
@@ -622,13 +852,18 @@ export function LeavePlannerScreen() {
                     {/* Get AI Recommendations Button */}
                     <button
                       onClick={() => {
-                        const plannedLeave = selectedOps.map(opp => ({
-                          holiday: opp.holiday.name,
-                          startDate: opp.startDate.toISOString().split('T')[0],
-                          endDate: opp.endDate.toISOString().split('T')[0],
-                          totalDaysOff: opp.totalDaysOff,
-                          leaveDaysRequired: opp.leaveDays.length,
-                        }));
+                        const plannedLeave = selectedOps.map(opp => {
+                          const { start, end } = getEffectiveDateRange(opp);
+                          const effectiveLeaveDays = getEffectiveLeaveDays(opp);
+                          const totalDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+                          return {
+                            holiday: opp.holiday.name,
+                            startDate: start.toISOString().split('T')[0],
+                            endDate: end.toISOString().split('T')[0],
+                            totalDaysOff: totalDays,
+                            leaveDaysRequired: effectiveLeaveDays,
+                          };
+                        });
                         
                         const context = encodeURIComponent(JSON.stringify(plannedLeave));
                         const message = encodeURIComponent(

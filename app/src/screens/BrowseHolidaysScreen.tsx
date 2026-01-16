@@ -248,9 +248,9 @@ type ListRow =
 
 export function BrowseHolidaysScreen() {
   const navigate = useNavigate();
-  const { addHoliday } = useHolidays();
+  const { addHoliday, clearAllHolidays } = useHolidays();
   const [selectedTab, setSelectedTab] = useState<'countries' | 'religions'>('countries');
-  const [selectedCountries, setSelectedCountries] = useState<Set<string>>(new Set());
+  const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isImporting, setIsImporting] = useState(false);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -289,25 +289,13 @@ export function BrowseHolidaysScreen() {
   // Pre-select user's country when detected
   useEffect(() => {
     if (userCountryCode && countriesData?.some(c => c.countryCode === userCountryCode)) {
-      setSelectedCountries(prev => {
-        if (prev.size === 0) {
-          return new Set([userCountryCode]);
-        }
-        return prev;
-      });
+      setSelectedCountry(prev => prev === null ? userCountryCode : prev);
     }
   }, [userCountryCode, countriesData]);
 
-  const toggleCountry = (countryCode: string, checked: boolean) => {
-    setSelectedCountries(prev => {
-      const next = new Set(prev);
-      if (checked) {
-        next.add(countryCode);
-      } else {
-        next.delete(countryCode);
-      }
-      return next;
-    });
+  const selectCountry = (countryCode: string, checked: boolean) => {
+    // Single selection: if checked, set as selected; if unchecked, deselect
+    setSelectedCountry(checked ? countryCode : null);
   };
 
   // Sort countries: user's country first, then alphabetically
@@ -386,32 +374,35 @@ export function BrowseHolidaysScreen() {
 
   const virtualItems = rowVirtualizer.getVirtualItems();
 
-  // Handle import
+  // Handle import - replaces existing holidays with the selected country's holidays
   const handleImport = async () => {
+    if (!selectedCountry) return;
+    
     setIsImporting(true);
     
     try {
-      for (const countryCode of selectedCountries) {
-        const holidays = await fetchPublicHolidays(currentYear, countryCode);
-        const country = countries.find(c => c.countryCode === countryCode);
+      const holidays = await fetchPublicHolidays(currentYear, selectedCountry);
+      const country = countries.find(c => c.countryCode === selectedCountry);
+      
+      // Clear existing holidays first
+      clearAllHolidays();
+      
+      for (const holiday of holidays) {
+        // Try to get rich details from our local data
+        const localDetails = getHolidayDetails(selectedCountry, holiday.name, holiday.localName);
         
-        for (const holiday of holidays) {
-          // Try to get rich details from our local data
-          const localDetails = getHolidayDetails(countryCode, holiday.name, holiday.localName);
-          
-          addHoliday({
-            name: holiday.name,
-            date: new Date(holiday.date),
-            // Use local data icon/color if available, otherwise use defaults
-            icon: localDetails?.icon || getHolidayIcon(holiday.types),
-            category: localDetails?.category || 'celebration',
-            color: localDetails?.color || getRandomHolidayColor(),
-            // Use rich description from local data if available
-            description: getHolidayDescription(countryCode, holiday),
-            recurrence: 'none', // Don't auto-recur as some holidays (e.g., Chinese New Year, Easter) don't fall on the same date every year
-            source: country?.name || countryCode,
-          });
-        }
+        addHoliday({
+          name: holiday.name,
+          date: new Date(holiday.date),
+          // Use local data icon/color if available, otherwise use defaults
+          icon: localDetails?.icon || getHolidayIcon(holiday.types),
+          category: localDetails?.category || 'celebration',
+          color: localDetails?.color || getRandomHolidayColor(),
+          // Use rich description from local data if available
+          description: getHolidayDescription(selectedCountry, holiday),
+          recurrence: 'none', // Don't auto-recur as some holidays (e.g., Chinese New Year, Easter) don't fall on the same date every year
+          source: country?.name || selectedCountry,
+        });
       }
       
       navigate('/holidays');
@@ -578,8 +569,8 @@ export function BrowseHolidaysScreen() {
                           flag={row.country.flag}
                           name={row.country.name}
                           countryCode={row.country.countryCode}
-                          checked={selectedCountries.has(row.country.countryCode)}
-                          onChange={(checked) => toggleCountry(row.country.countryCode, checked)}
+                          checked={selectedCountry === row.country.countryCode}
+                          onChange={(checked) => selectCountry(row.country.countryCode, checked)}
                           accentColor={getAccentColor(row.index)}
                         />
                       </div>
@@ -599,7 +590,7 @@ export function BrowseHolidaysScreen() {
           className="w-full" 
           size="md" 
           icon={isImporting ? undefined : "celebration"}
-          disabled={selectedCountries.size === 0 || isImporting}
+          disabled={!selectedCountry || isImporting}
           onClick={handleImport}
         >
           {isImporting ? (
@@ -608,7 +599,7 @@ export function BrowseHolidaysScreen() {
               Importing...
             </span>
           ) : (
-            `Import Holidays (${selectedCountries.size} countries)`
+            'Replace Holidays'
           )}
         </Button>
       </div>
