@@ -1,8 +1,52 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MobileContainer, IconButton, HolidayCard } from '../components';
+import { MobileContainer, IconButton, HolidayCard, NextHolidayCard } from '../components';
 import { useTheme, useHolidays } from '../context';
 import type { Holiday } from '../types/holiday';
+
+type HolidayWithEffectiveDate = Holiday & { effectiveDate: Date };
+
+interface GroupedHolidays {
+  next3Months: HolidayWithEffectiveDate[];
+  next6Months: HolidayWithEffectiveDate[];
+  next12Months: HolidayWithEffectiveDate[];
+  beyond: HolidayWithEffectiveDate[];
+}
+
+// Group holidays by time period
+function groupHolidaysByPeriod(holidays: HolidayWithEffectiveDate[]): GroupedHolidays {
+  const now = new Date();
+  const threeMonthsLater = new Date(now);
+  threeMonthsLater.setMonth(threeMonthsLater.getMonth() + 3);
+  
+  const sixMonthsLater = new Date(now);
+  sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
+  
+  const twelveMonthsLater = new Date(now);
+  twelveMonthsLater.setMonth(twelveMonthsLater.getMonth() + 12);
+
+  const groups: GroupedHolidays = {
+    next3Months: [],
+    next6Months: [],
+    next12Months: [],
+    beyond: [],
+  };
+
+  holidays.forEach(holiday => {
+    const date = holiday.effectiveDate;
+    if (date <= threeMonthsLater) {
+      groups.next3Months.push(holiday);
+    } else if (date <= sixMonthsLater) {
+      groups.next6Months.push(holiday);
+    } else if (date <= twelveMonthsLater) {
+      groups.next12Months.push(holiday);
+    } else {
+      groups.beyond.push(holiday);
+    }
+  });
+
+  return groups;
+}
 
 // Calculate the next occurrence of a recurring event
 function getNextOccurrence(date: Date, recurrence: Holiday['recurrence']): Date {
@@ -69,18 +113,26 @@ export function HolidayListScreen() {
   const { theme, toggleTheme } = useTheme();
   const { holidays, clearAllHolidays } = useHolidays();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  const MAX_VISIBLE = 5;
   
   // Filter out past one-time events and sort by next occurrence date
-  const visibleHolidays = holidays
-    .filter(shouldShowHoliday)
-    .map(holiday => ({
-      ...holiday,
-      effectiveDate: getNextOccurrence(holiday.date, holiday.recurrence),
-    }))
-    .sort((a, b) => a.effectiveDate.getTime() - b.effectiveDate.getTime());
+  const visibleHolidays = useMemo(() => {
+    return holidays
+      .filter(shouldShowHoliday)
+      .map(holiday => ({
+        ...holiday,
+        effectiveDate: getNextOccurrence(holiday.date, holiday.recurrence),
+      }))
+      .sort((a, b) => a.effectiveDate.getTime() - b.effectiveDate.getTime());
+  }, [holidays]);
+
+  // Separate next holiday from the rest
+  const nextHoliday = visibleHolidays[0];
+  const remainingHolidays = visibleHolidays.slice(1);
+  
+  // Group remaining holidays by time period
+  const groupedHolidays = useMemo(() => {
+    return groupHolidaysByPeriod(remainingHolidays);
+  }, [remainingHolidays]);
 
   return (
     <div className="bg-background-light dark:bg-background-dark min-h-screen">
@@ -140,30 +192,116 @@ export function HolidayListScreen() {
           </div>
           
           {/* Holiday cards */}
-          <div className="flex flex-col gap-4 px-6 pt-2">
-            {(isExpanded ? visibleHolidays : visibleHolidays.slice(0, MAX_VISIBLE)).map((holiday, index, arr) => (
-              <HolidayCard 
-                key={holiday.id} 
-                holiday={holiday}
-                effectiveDate={holiday.effectiveDate}
-                variant={index === 0 ? 'featured' : index === arr.length - 1 ? 'compact' : 'standard'}
-              />
-            ))}
-            
-            {/* View More / View Less button */}
-            {visibleHolidays.length > MAX_VISIBLE && (
-              <button
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="flex items-center justify-center gap-2 py-3 text-primary dark:text-primary font-semibold text-sm active:scale-95 transition-transform"
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {isExpanded ? 'expand_less' : 'expand_more'}
-                </span>
-                {isExpanded 
-                  ? 'View Less' 
-                  : `View ${visibleHolidays.length - MAX_VISIBLE} More`
-                }
-              </button>
+          <div className="flex flex-col gap-6 px-6 pt-2">
+            {visibleHolidays.length === 0 ? (
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center py-16 px-6">
+                <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
+                  <span className="material-symbols-outlined text-5xl text-slate-300 dark:text-slate-600">
+                    calendar_month
+                  </span>
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 text-center">
+                  No Events Yet
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 text-center max-w-[280px] mb-8">
+                  Start counting down to your favorite holidays and special moments.
+                </p>
+                <div className="flex flex-col gap-3 w-full max-w-[240px]">
+                  <button
+                    onClick={() => navigate('/add')}
+                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-primary text-white rounded-xl font-semibold active:scale-95 transition-transform shadow-lg shadow-primary/25"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">add</span>
+                    Add Your First Event
+                  </button>
+                  <button
+                    onClick={() => navigate('/import')}
+                    className="flex items-center justify-center gap-2 px-6 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl font-semibold active:scale-95 transition-transform"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">download</span>
+                    Import Holidays
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                {/* Next Holiday - Featured with Timer */}
+                {nextHoliday && (
+                  <NextHolidayCard 
+                    holiday={nextHoliday} 
+                    effectiveDate={nextHoliday.effectiveDate} 
+                  />
+                )}
+                
+                {/* Next 3 Months */}
+                {groupedHolidays.next3Months.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
+                      Next 3 Months
+                    </h3>
+                    {groupedHolidays.next3Months.map((holiday) => (
+                      <HolidayCard 
+                        key={holiday.id} 
+                        holiday={holiday}
+                        effectiveDate={holiday.effectiveDate}
+                        variant="compact"
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Next 6 Months */}
+                {groupedHolidays.next6Months.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
+                      Next 6 Months
+                    </h3>
+                    {groupedHolidays.next6Months.map((holiday) => (
+                      <HolidayCard 
+                        key={holiday.id} 
+                        holiday={holiday}
+                        effectiveDate={holiday.effectiveDate}
+                        variant="compact"
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Next 12 Months */}
+                {groupedHolidays.next12Months.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
+                      Next 12 Months
+                    </h3>
+                    {groupedHolidays.next12Months.map((holiday) => (
+                      <HolidayCard 
+                        key={holiday.id} 
+                        holiday={holiday}
+                        effectiveDate={holiday.effectiveDate}
+                        variant="compact"
+                      />
+                    ))}
+                  </div>
+                )}
+                
+                {/* Beyond 12 Months */}
+                {groupedHolidays.beyond.length > 0 && (
+                  <div className="flex flex-col gap-3">
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1">
+                      Later
+                    </h3>
+                    {groupedHolidays.beyond.map((holiday) => (
+                      <HolidayCard 
+                        key={holiday.id} 
+                        holiday={holiday}
+                        effectiveDate={holiday.effectiveDate}
+                        variant="compact"
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
             )}
           </div>
           

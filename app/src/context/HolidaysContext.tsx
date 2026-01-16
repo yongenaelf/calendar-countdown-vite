@@ -3,50 +3,8 @@ import type { Holiday } from '../types/holiday';
 
 const HOLIDAYS_KEY = 'calendar-countdown-holidays';
 
-// Default holidays
-const defaultHolidays: Holiday[] = [
-  {
-    id: '1',
-    name: 'Christmas',
-    date: new Date('2025-12-25'),
-    icon: 'forest',
-    category: 'religious',
-    color: 'emerald',
-    description: 'Christmas is an annual festival commemorating the birth of Jesus Christ.',
-    recurrence: 'yearly',
-    source: 'US Holidays',
-    reminder: true,
-  },
-  {
-    id: '2',
-    name: 'Trip to Bali',
-    date: new Date('2026-01-15T10:00:00'),
-    icon: 'flight_takeoff',
-    category: 'travel',
-    color: 'sky',
-    description: 'Annual vacation to Bali, Indonesia.',
-    reminder: true,
-  },
-  {
-    id: '3',
-    name: "New Year's Eve",
-    date: new Date('2025-12-31'),
-    icon: 'celebration',
-    category: 'celebration',
-    color: 'indigo',
-    recurrence: 'yearly',
-  },
-  {
-    id: '4',
-    name: "Mom's Birthday",
-    date: new Date('2026-02-20'),
-    icon: 'cake',
-    category: 'birthday',
-    color: 'pink',
-    recurrence: 'yearly',
-    reminder: true,
-  },
-];
+// Default holidays (empty - user starts fresh)
+const defaultHolidays: Holiday[] = [];
 
 interface HolidaysContextType {
   holidays: Holiday[];
