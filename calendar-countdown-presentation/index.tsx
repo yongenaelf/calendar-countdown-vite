@@ -41,17 +41,12 @@ const theme = {
 // Custom template
 const template = () => (
   <FlexBox
-    justifyContent="space-between"
+    justifyContent="flex-end"
     position="absolute"
     bottom={0}
     width={1}
     padding="0 1em"
   >
-    <Box padding="0.5em">
-      <Text fontSize="12px" color="quaternary">
-        Calendar Countdown • Stakeholder Presentation
-      </Text>
-    </Box>
     <Box padding="0.5em">
       <Progress color="secondary" size={4} />
     </Box>
@@ -702,9 +697,6 @@ const Presentation = () => (
             </Text>
           </Box>
         </Box>
-        <Text fontSize="16px" color="quaternary" style={{ marginTop: '35px' }}>
-          Calendar Countdown • Stakeholder Presentation
-        </Text>
       </FlexBox>
     </Slide>
   </Deck>
