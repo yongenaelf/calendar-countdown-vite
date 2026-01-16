@@ -11,10 +11,113 @@ import {
   detectUserCountry,
   getHolidayIcon,
   getRandomHolidayColor,
-  type NagerCountry
+  type NagerCountry,
+  type NagerPublicHoliday
 } from '../services/holidayApi';
+import { publicHolidaysByCountry, type PublicHolidayTemplate } from '../data';
 
 const currentYear = new Date().getFullYear();
+
+/**
+ * Look up holiday details from our local data
+ * This provides rich descriptions for holidays we have information about
+ */
+function getHolidayDetails(
+  countryCode: string, 
+  holidayName: string, 
+  localName: string
+): PublicHolidayTemplate | null {
+  const countryData = publicHolidaysByCountry[countryCode];
+  if (!countryData) return null;
+
+  const normalizedName = holidayName.toLowerCase();
+  const normalizedLocalName = localName.toLowerCase();
+  
+  // Score-based matching to find the best match
+  let bestMatch: PublicHolidayTemplate | null = null;
+  let bestScore = 0;
+  
+  for (const template of countryData.holidays) {
+    const templateName = template.name.toLowerCase();
+    const templateBaseName = templateName.replace(/\s*\(day \d+\)/i, '').trim();
+    let score = 0;
+    
+    // Exact match gets highest score
+    if (templateName === normalizedName || templateName === normalizedLocalName) {
+      score = 100;
+    }
+    // Base name exact match (e.g., "chinese new year" matches "Chinese New Year (Day 1)")
+    else if (templateBaseName === normalizedName || templateBaseName === normalizedLocalName) {
+      score = 90;
+    }
+    // Check if the holiday name contains the template base name
+    else if (normalizedName.includes(templateBaseName) && templateBaseName.length > 5) {
+      // Give higher score for longer matches to avoid "new year" matching everything
+      score = 50 + templateBaseName.length;
+    }
+    // Check common variations with specific matching
+    else {
+      const variations: Record<string, string[]> = {
+        "new year's day": ["new year's day"], // Be strict - only exact match
+        "chinese new year": ["chinese new year", "lunar new year", "spring festival", "农历新年", "春节"],
+        "hari raya puasa": ["hari raya puasa", "eid al-fitr", "eid ul-fitr", "hari raya aidilfitri"],
+        "hari raya haji": ["hari raya haji", "eid al-adha", "eid ul-adha", "hari raya aidiladha"],
+        "vesak day": ["vesak day", "vesak", "buddha day", "卫塞节"],
+        "deepavali": ["deepavali", "diwali", "festival of lights", "屠妖节"],
+        "christmas day": ["christmas day", "christmas"],
+        "good friday": ["good friday"],
+        "labour day": ["labour day", "labor day", "may day"],
+        "national day": ["national day"],
+      };
+      
+      for (const [key, aliases] of Object.entries(variations)) {
+        if (templateBaseName.includes(key)) {
+          for (const alias of aliases) {
+            if (normalizedName === alias || normalizedLocalName === alias) {
+              score = 80; // Exact alias match
+              break;
+            }
+            if (normalizedName.includes(alias) || normalizedLocalName.includes(alias)) {
+              // Only match if it's a substantial part of the name
+              if (alias.length > 8 || normalizedName.length < alias.length + 10) {
+                score = Math.max(score, 60 + alias.length);
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = template;
+    }
+  }
+  
+  // Only return a match if we have reasonable confidence
+  return bestScore >= 50 ? bestMatch : null;
+}
+
+/**
+ * Get the best description for a holiday
+ */
+function getHolidayDescription(
+  countryCode: string,
+  holiday: NagerPublicHoliday
+): string | undefined {
+  // First, try to get rich description from our local data
+  const localDetails = getHolidayDetails(countryCode, holiday.name, holiday.localName);
+  if (localDetails) {
+    return localDetails.description;
+  }
+  
+  // Fall back to showing local name if different
+  if (holiday.localName !== holiday.name) {
+    return `Local name: ${holiday.localName}`;
+  }
+  
+  return undefined;
+}
 
 const accentColors = {
   orange: {
@@ -293,13 +396,18 @@ export function BrowseHolidaysScreen() {
         const country = countries.find(c => c.countryCode === countryCode);
         
         for (const holiday of holidays) {
+          // Try to get rich details from our local data
+          const localDetails = getHolidayDetails(countryCode, holiday.name, holiday.localName);
+          
           addHoliday({
             name: holiday.name,
             date: new Date(holiday.date),
-            icon: getHolidayIcon(holiday.types),
-            category: 'celebration',
-            color: getRandomHolidayColor(),
-            description: holiday.localName !== holiday.name ? `Local name: ${holiday.localName}` : undefined,
+            // Use local data icon/color if available, otherwise use defaults
+            icon: localDetails?.icon || getHolidayIcon(holiday.types),
+            category: localDetails?.category || 'celebration',
+            color: localDetails?.color || getRandomHolidayColor(),
+            // Use rich description from local data if available
+            description: getHolidayDescription(countryCode, holiday),
             recurrence: 'none', // Don't auto-recur as some holidays (e.g., Chinese New Year, Easter) don't fall on the same date every year
             source: country?.name || countryCode,
           });
