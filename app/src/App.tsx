@@ -7,6 +7,7 @@ import {
   ImportHolidaysScreen,
   BrowseHolidaysScreen,
   WidgetConfigScreen,
+  LeavePlannerScreen,
 } from './screens';
 import { HolidaysProvider } from './context';
 
@@ -23,6 +24,7 @@ function App() {
           <Route path="/import" element={<ImportHolidaysScreen />} />
           <Route path="/browse" element={<BrowseHolidaysScreen />} />
           <Route path="/widget" element={<WidgetConfigScreen />} />
+          <Route path="/leave-planner" element={<LeavePlannerScreen />} />
         </Routes>
       </HolidaysProvider>
     </BrowserRouter>

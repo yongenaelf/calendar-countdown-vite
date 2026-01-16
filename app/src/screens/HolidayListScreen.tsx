@@ -181,6 +181,15 @@ export function HolidayListScreen() {
               </button>
               {holidays.length > 0 && (
                 <button 
+                  onClick={() => navigate('/leave-planner')}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-indigo-50 dark:bg-surface-dark text-indigo-600 dark:text-indigo-400 rounded-full font-semibold text-xs border border-indigo-100 dark:border-white/10 active:scale-95 transition-transform"
+                >
+                  <span className="material-symbols-outlined text-[16px]">flight_takeoff</span>
+                  Leave
+                </button>
+              )}
+              {holidays.length > 0 && (
+                <button 
                   onClick={() => setShowClearConfirm(true)}
                   className="flex items-center gap-1.5 px-3 py-2 bg-red-50 dark:bg-surface-dark text-red-500 dark:text-red-400 rounded-full font-semibold text-xs border border-red-100 dark:border-white/10 active:scale-95 transition-transform"
                 >
