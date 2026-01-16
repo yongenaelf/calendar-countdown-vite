@@ -240,44 +240,42 @@ const Presentation = () => (
     {/* User Journey */}
     <Slide backgroundColor="tertiary">
       <Heading fontSize="h2" color="primary">User Journey 🚀</Heading>
-      <FlexBox justifyContent="center" alignItems="center" style={{ marginTop: '30px' }}>
-        <Grid gridTemplateColumns="1fr 40px 1fr 40px 1fr 40px 1fr" alignItems="center">
-          <Appear>
-            <Box backgroundColor="#fff" padding="18px" style={{ borderRadius: '14px', boxShadow: '0 8px 20px rgba(0,0,0,0.07)', textAlign: 'center' }}>
-              <Text fontSize="36px">📥</Text>
-              <Text fontSize="16px" color="primary" fontWeight="bold" style={{ marginTop: '8px' }}>Download</Text>
-              <Text fontSize="12px" color="quaternary">Open the app</Text>
-            </Box>
-          </Appear>
-          <Appear><Text fontSize="24px" color="quaternary">→</Text></Appear>
-          <Appear>
-            <Box backgroundColor="#fff" padding="18px" style={{ borderRadius: '14px', boxShadow: '0 8px 20px rgba(0,0,0,0.07)', textAlign: 'center' }}>
-              <Text fontSize="36px">🌍</Text>
-              <Text fontSize="16px" color="primary" fontWeight="bold" style={{ marginTop: '8px' }}>Select Country</Text>
-              <Text fontSize="12px" color="quaternary">Auto-detected</Text>
-            </Box>
-          </Appear>
-          <Appear><Text fontSize="24px" color="quaternary">→</Text></Appear>
-          <Appear>
-            <Box backgroundColor="#fff" padding="18px" style={{ borderRadius: '14px', boxShadow: '0 8px 20px rgba(0,0,0,0.07)', textAlign: 'center' }}>
-              <Text fontSize="36px">🎉</Text>
-              <Text fontSize="16px" color="primary" fontWeight="bold" style={{ marginTop: '8px' }}>Instant Holidays</Text>
-              <Text fontSize="12px" color="quaternary">One-tap import</Text>
-            </Box>
-          </Appear>
-          <Appear><Text fontSize="24px" color="quaternary">→</Text></Appear>
-          <Appear>
-            <Box backgroundColor="#f97316" padding="18px" style={{ borderRadius: '14px', boxShadow: '0 8px 20px rgba(249,115,22,0.25)', textAlign: 'center' }}>
-              <Text fontSize="36px">⏱️</Text>
-              <Text fontSize="16px" color="tertiary" fontWeight="bold" style={{ marginTop: '8px' }}>Start Counting!</Text>
-              <Text fontSize="12px" color="rgba(255,255,255,0.8)">Real-time</Text>
-            </Box>
-          </Appear>
-        </Grid>
+      <FlexBox justifyContent="center" alignItems="center" style={{ marginTop: '25px', gap: '12px' }}>
+        <Appear>
+          <Box backgroundColor="#fff" padding="14px 18px" width="150px" style={{ borderRadius: '12px', boxShadow: '0 6px 16px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+            <Text fontSize="32px">📥</Text>
+            <Text fontSize="14px" color="primary" fontWeight="bold" style={{ marginTop: '6px' }}>Download</Text>
+            <Text fontSize="11px" color="quaternary">Open the app</Text>
+          </Box>
+        </Appear>
+        <Appear><Text fontSize="20px" color="quaternary">→</Text></Appear>
+        <Appear>
+          <Box backgroundColor="#fff" padding="14px 18px" width="150px" style={{ borderRadius: '12px', boxShadow: '0 6px 16px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+            <Text fontSize="32px">🌍</Text>
+            <Text fontSize="14px" color="primary" fontWeight="bold" style={{ marginTop: '6px' }}>Select Country</Text>
+            <Text fontSize="11px" color="quaternary">Auto-detected</Text>
+          </Box>
+        </Appear>
+        <Appear><Text fontSize="20px" color="quaternary">→</Text></Appear>
+        <Appear>
+          <Box backgroundColor="#fff" padding="14px 18px" width="150px" style={{ borderRadius: '12px', boxShadow: '0 6px 16px rgba(0,0,0,0.06)', textAlign: 'center' }}>
+            <Text fontSize="32px">🎉</Text>
+            <Text fontSize="14px" color="primary" fontWeight="bold" style={{ marginTop: '6px' }}>Import Holidays</Text>
+            <Text fontSize="11px" color="quaternary">One-tap</Text>
+          </Box>
+        </Appear>
+        <Appear><Text fontSize="20px" color="quaternary">→</Text></Appear>
+        <Appear>
+          <Box backgroundColor="#f97316" padding="14px 18px" width="150px" style={{ borderRadius: '12px', boxShadow: '0 6px 16px rgba(249,115,22,0.2)', textAlign: 'center' }}>
+            <Text fontSize="32px">⏱️</Text>
+            <Text fontSize="14px" color="tertiary" fontWeight="bold" style={{ marginTop: '6px' }}>Start Counting!</Text>
+            <Text fontSize="11px" color="rgba(255,255,255,0.8)">Real-time</Text>
+          </Box>
+        </Appear>
       </FlexBox>
       <Appear>
-        <Box style={{ marginTop: '40px', textAlign: 'center' }}>
-          <Text fontSize="22px" color="secondary" fontWeight="bold">
+        <Box style={{ marginTop: '30px', textAlign: 'center' }}>
+          <Text fontSize="20px" color="secondary" fontWeight="bold">
             Time to value: Under 30 seconds ⚡
           </Text>
         </Box>
