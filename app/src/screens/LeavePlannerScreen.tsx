@@ -618,6 +618,32 @@ export function LeavePlannerScreen() {
                         );
                       })}
                     </div>
+                    
+                    {/* Get AI Recommendations Button */}
+                    <button
+                      onClick={() => {
+                        const plannedLeave = selectedOps.map(opp => ({
+                          holiday: opp.holiday.name,
+                          startDate: opp.startDate.toISOString().split('T')[0],
+                          endDate: opp.endDate.toISOString().split('T')[0],
+                          totalDaysOff: opp.totalDaysOff,
+                          leaveDaysRequired: opp.leaveDays.length,
+                        }));
+                        
+                        const context = encodeURIComponent(JSON.stringify(plannedLeave));
+                        const message = encodeURIComponent(
+                          `I have planned the following vacation periods and I'm looking for travel destination recommendations. Please suggest suitable holiday destinations for each period, considering the duration, time of year, and weather. Include a mix of budget-friendly and premium options, with brief explanations of why each destination is ideal for that specific time.`
+                        );
+                        
+                        const url = `https://app.godgpt.fun?redirect=true&type=autoPrompt&utm_source=holiday&context=${context}&message=${message}`;
+                        window.open(url, '_blank');
+                      }}
+                      className="mt-4 w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white rounded-xl font-semibold text-sm active:scale-[0.98] transition-all shadow-lg shadow-purple-500/25"
+                    >
+                      <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                      Get AI Destination Recommendations
+                      <span className="material-symbols-outlined text-lg ml-1">open_in_new</span>
+                    </button>
                   </div>
                 )}
                 
