@@ -52,6 +52,17 @@ jobs:
         run: pnpm build
         working-directory: app
 
+      - name: Install dependencies for presentation
+        run: pnpm install
+        working-directory: calendar-countdown-presentation
+
+      - name: Build presentation
+        run: pnpm build
+        working-directory: calendar-countdown-presentation
+
+      - name: Copy presentation to app
+        run: cp -r calendar-countdown-presentation/dist app/dist/presentation
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
