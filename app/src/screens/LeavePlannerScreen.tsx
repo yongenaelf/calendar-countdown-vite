@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer, IconButton } from '../components';
 import { useHolidays } from '../context';
 import type { Holiday } from '../types/holiday';
+
+const LEAVE_STORAGE_KEY = 'leave-planner-total-days';
+const SELECTED_STORAGE_KEY = 'leave-planner-selected';
 
 // Day names for display
 const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -316,6 +319,17 @@ export function LeavePlannerScreen() {
   const navigate = useNavigate();
   const { holidays } = useHolidays();
   
+  // Load saved state from localStorage
+  const [totalLeaveDays, setTotalLeaveDays] = useState<number>(() => {
+    const saved = localStorage.getItem(LEAVE_STORAGE_KEY);
+    return saved ? parseInt(saved, 10) : 14; // Default 14 days
+  });
+  
+  const [selectedOpportunities, setSelectedOpportunities] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem(SELECTED_STORAGE_KEY);
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
+  
   // Build set of all holiday dates for quick lookup
   const allHolidayDates = useMemo(() => {
     const dates = new Set<string>();
@@ -331,20 +345,52 @@ export function LeavePlannerScreen() {
     return findLongWeekendOpportunities(holidays, allHolidayDates);
   }, [holidays, allHolidayDates]);
   
+  // Calculate consumed leave days from selected opportunities
+  const consumedLeaveDays = useMemo(() => {
+    return opportunities
+      .filter(o => selectedOpportunities.has(o.id))
+      .reduce((sum, o) => sum + o.leaveDays.length, 0);
+  }, [opportunities, selectedOpportunities]);
+  
+  // Calculate total days off from selected opportunities
+  const totalSelectedDaysOff = useMemo(() => {
+    return opportunities
+      .filter(o => selectedOpportunities.has(o.id))
+      .reduce((sum, o) => sum + o.totalDaysOff, 0);
+  }, [opportunities, selectedOpportunities]);
+  
+  const remainingLeaveDays = totalLeaveDays - consumedLeaveDays;
+  const progressPercent = totalLeaveDays > 0 ? (consumedLeaveDays / totalLeaveDays) * 100 : 0;
+  
+  // Save to localStorage when values change
+  const handleTotalLeaveDaysChange = (value: number) => {
+    const clampedValue = Math.max(0, Math.min(365, value));
+    setTotalLeaveDays(clampedValue);
+    localStorage.setItem(LEAVE_STORAGE_KEY, clampedValue.toString());
+  };
+  
+  const toggleOpportunity = (oppId: string, leaveDaysRequired: number) => {
+    setSelectedOpportunities(prev => {
+      const next = new Set(prev);
+      if (next.has(oppId)) {
+        next.delete(oppId);
+      } else {
+        // Only allow selection if enough leave days remaining
+        if (remainingLeaveDays >= leaveDaysRequired) {
+          next.add(oppId);
+        }
+      }
+      localStorage.setItem(SELECTED_STORAGE_KEY, JSON.stringify([...next]));
+      return next;
+    });
+  };
+  
   // Calculate stats
   const stats = useMemo(() => {
     const naturalLongWeekends = opportunities.filter(o => o.leaveDays.length === 0).length;
-    const totalLeaveDays = opportunities
-      .filter(o => o.leaveDays.length > 0)
-      .reduce((sum, o) => sum + o.leaveDays.length, 0);
-    const totalDaysOff = opportunities
-      .filter(o => o.leaveDays.length > 0)
-      .reduce((sum, o) => sum + o.totalDaysOff, 0);
     
     return {
       naturalLongWeekends,
-      totalLeaveDays,
-      totalDaysOff,
       opportunities: opportunities.length,
     };
   }, [opportunities]);
@@ -376,29 +422,102 @@ export function LeavePlannerScreen() {
               Maximize Your Time Off
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-              Smart suggestions to turn your holidays into long weekends and extended breaks.
+              Select opportunities below to plan your leave days.
             </p>
           </div>
           
-          {/* Stats Cards */}
+          {/* Leave Budget Input */}
           {opportunities.length > 0 && (
             <div className="px-6 mb-6">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-white/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-emerald-500 text-xl">calendar_month</span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Natural</span>
+              <div className="bg-white dark:bg-surface-dark rounded-2xl p-5 shadow-sm border border-slate-100 dark:border-white/5">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="font-semibold text-slate-900 dark:text-white text-sm">Annual Leave Budget</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">How many leave days do you have?</p>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.naturalLongWeekends}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Long weekends</p>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleTotalLeaveDaysChange(totalLeaveDays - 1)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-lg">remove</span>
+                    </button>
+                    <input
+                      type="number"
+                      value={totalLeaveDays}
+                      onChange={(e) => handleTotalLeaveDaysChange(parseInt(e.target.value) || 0)}
+                      className="w-14 h-10 text-center text-lg font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      min="0"
+                      max="365"
+                    />
+                    <button
+                      onClick={() => handleTotalLeaveDaysChange(totalLeaveDays + 1)}
+                      className="w-8 h-8 flex items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 active:scale-95 transition-transform"
+                    >
+                      <span className="material-symbols-outlined text-lg">add</span>
+                    </button>
+                  </div>
                 </div>
-                <div className="bg-white dark:bg-surface-dark rounded-2xl p-4 shadow-sm border border-slate-100 dark:border-white/5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="material-symbols-outlined text-indigo-500 text-xl">event_available</span>
-                    <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Potential</span>
+                
+                {/* Progress Bar */}
+                <div className="mb-3">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="font-medium text-slate-600 dark:text-slate-400">
+                      {consumedLeaveDays} of {totalLeaveDays} days used
+                    </span>
+                    <span className={`font-bold ${remainingLeaveDays > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}`}>
+                      {remainingLeaveDays} remaining
+                    </span>
                   </div>
-                  <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalDaysOff}</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Days off with {stats.totalLeaveDays} leave</p>
+                  <div className="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all duration-300 ${
+                        progressPercent > 90 ? 'bg-red-500' : 
+                        progressPercent > 70 ? 'bg-amber-500' : 
+                        'bg-gradient-to-r from-indigo-500 to-purple-500'
+                      }`}
+                      style={{ width: `${Math.min(100, progressPercent)}%` }}
+                    />
+                  </div>
+                </div>
+                
+                {/* Summary Stats */}
+                {selectedOpportunities.size > 0 && (
+                  <div className="flex items-center gap-4 pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-indigo-500 text-lg">check_circle</span>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        {selectedOpportunities.size} selected
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-emerald-500 text-lg">celebration</span>
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        {totalSelectedDaysOff} total days off
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Stats Cards */}
+          {opportunities.length > 0 && stats.naturalLongWeekends > 0 && (
+            <div className="px-6 mb-4">
+              <div className="bg-emerald-50 dark:bg-emerald-500/10 rounded-2xl p-4 border border-emerald-100 dark:border-emerald-500/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400">auto_awesome</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+                      {stats.naturalLongWeekends} Natural Long Weekend{stats.naturalLongWeekends > 1 ? 's' : ''}
+                    </p>
+                    <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                      No leave required - already scheduled!
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -407,7 +526,7 @@ export function LeavePlannerScreen() {
           {/* Opportunities List */}
           <div className="px-6">
             <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-              {opportunities.length > 0 ? 'Opportunities' : 'No Opportunities Found'}
+              {opportunities.length > 0 ? 'Select Your Long Weekends' : 'No Opportunities Found'}
             </h3>
             
             {opportunities.length === 0 ? (
@@ -432,43 +551,75 @@ export function LeavePlannerScreen() {
                 {opportunities.map((opp) => {
                   const colors = getEfficiencyColor(opp.efficiency);
                   const holidayDay = dayNames[opp.holidayDate.getDay()];
+                  const isSelected = selectedOpportunities.has(opp.id);
+                  const requiresLeave = opp.leaveDays.length > 0;
+                  const canSelect = !requiresLeave || isSelected || remainingLeaveDays >= opp.leaveDays.length;
                   
                   return (
                     <div 
                       key={opp.id}
-                      className={`${colors.bg} rounded-2xl p-4 border border-white/50 dark:border-white/5 shadow-sm`}
+                      onClick={() => requiresLeave && canSelect && toggleOpportunity(opp.id, opp.leaveDays.length)}
+                      className={`
+                        ${colors.bg} rounded-2xl p-4 border-2 shadow-sm transition-all
+                        ${isSelected 
+                          ? 'border-primary dark:border-primary ring-2 ring-primary/20 shadow-md' 
+                          : 'border-white/50 dark:border-white/5'
+                        }
+                        ${requiresLeave && canSelect ? 'cursor-pointer active:scale-[0.98]' : ''}
+                        ${requiresLeave && !canSelect && !isSelected ? 'opacity-50' : ''}
+                      `}
                     >
                       {/* Header */}
                       <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-bold text-slate-900 dark:text-white text-base">
-                            {opp.holiday.name}
-                          </h4>
-                          <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {holidayDay}, {opp.holidayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </p>
+                        <div className="flex items-start gap-3 flex-1">
+                          {/* Selection indicator */}
+                          {requiresLeave && (
+                            <div className={`
+                              mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
+                              ${isSelected 
+                                ? 'bg-primary border-primary' 
+                                : canSelect 
+                                  ? 'border-slate-300 dark:border-slate-600' 
+                                  : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800'
+                              }
+                            `}>
+                              {isSelected && (
+                                <span className="material-symbols-outlined text-white text-sm">check</span>
+                              )}
+                            </div>
+                          )}
+                          <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                              {opp.holiday.name}
+                            </h4>
+                            <p className="text-sm text-slate-500 dark:text-slate-400">
+                              {holidayDay}, {opp.holidayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </p>
+                          </div>
                         </div>
-                        <div className={`${colors.badge} px-2.5 py-1 rounded-lg text-xs font-bold`}>
-                          {opp.totalDaysOff} days
+                        <div className="flex flex-col items-end gap-1">
+                          <div className={`${colors.badge} px-2.5 py-1 rounded-lg text-xs font-bold`}>
+                            {opp.totalDaysOff} days off
+                          </div>
+                          {requiresLeave && (
+                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                              {opp.leaveDays.length} leave
+                            </span>
+                          )}
                         </div>
                       </div>
                       
                       {/* Description */}
-                      <p className={`text-sm font-medium ${colors.text} mb-3`}>
+                      <p className={`text-sm font-medium ${colors.text} mb-3 ${requiresLeave ? 'ml-9' : ''}`}>
                         {opp.description}
                       </p>
                       
                       {/* Calendar visualization */}
-                      <div className="bg-white/60 dark:bg-white/5 rounded-xl p-3">
+                      <div className={`bg-white/60 dark:bg-white/5 rounded-xl p-3 ${requiresLeave ? 'ml-9' : ''}`}>
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                             {formatDateRange(opp.startDate, opp.endDate)}
                           </span>
-                          {opp.leaveDays.length > 0 && (
-                            <span className="text-xs text-slate-400 dark:text-slate-500">
-                              {opp.leaveDays.length} leave day{opp.leaveDays.length > 1 ? 's' : ''}
-                            </span>
-                          )}
                         </div>
                         
                         {/* Day pills */}
@@ -483,7 +634,9 @@ export function LeavePlannerScreen() {
                             if (isHoliday) {
                               bgColor = 'bg-primary text-white';
                             } else if (isLeaveDay) {
-                              bgColor = 'bg-amber-400 dark:bg-amber-500 text-white';
+                              bgColor = isSelected 
+                                ? 'bg-amber-400 dark:bg-amber-500 text-white' 
+                                : 'bg-amber-200 dark:bg-amber-500/40 text-amber-700 dark:text-amber-300';
                             } else if (isWeekendDay) {
                               bgColor = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400';
                             }
@@ -518,6 +671,13 @@ export function LeavePlannerScreen() {
                           </div>
                         </div>
                       </div>
+                      
+                      {/* Disabled message */}
+                      {requiresLeave && !canSelect && !isSelected && (
+                        <p className="text-xs text-red-500 dark:text-red-400 mt-2 ml-9">
+                          Not enough leave days remaining
+                        </p>
+                      )}
                     </div>
                   );
                 })}
@@ -534,8 +694,7 @@ export function LeavePlannerScreen() {
                   <div>
                     <h4 className="font-semibold text-slate-900 dark:text-white text-sm mb-1">Pro Tip</h4>
                     <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-                      Thursday and Monday holidays are the best for long weekends - just 1 leave day gets you 4 days off! 
-                      Wednesday holidays can give you up to 9 days off with 4 leave days.
+                      Tap on the cards with leave days to select them. Thursday and Monday holidays are the most efficient - just 1 leave day gets you 4 days off!
                     </p>
                   </div>
                 </div>
