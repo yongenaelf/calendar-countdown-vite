@@ -394,6 +394,22 @@ export function LeavePlannerScreen() {
       opportunities: opportunities.length,
     };
   }, [opportunities]);
+  
+  // Separate selected and unselected opportunities
+  const { selectedOps, unselectedOps } = useMemo(() => {
+    const selected: LongWeekendOpportunity[] = [];
+    const unselected: LongWeekendOpportunity[] = [];
+    
+    opportunities.forEach(opp => {
+      if (selectedOpportunities.has(opp.id)) {
+        selected.push(opp);
+      } else {
+        unselected.push(opp);
+      }
+    });
+    
+    return { selectedOps: selected, unselectedOps: unselected };
+  }, [opportunities, selectedOpportunities]);
 
   return (
     <div className="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-background-dark dark:via-background-dark dark:to-background-dark min-h-screen">
@@ -525,163 +541,218 @@ export function LeavePlannerScreen() {
           
           {/* Opportunities List */}
           <div className="px-6">
-            <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-              {opportunities.length > 0 ? 'Select Your Long Weekends' : 'No Opportunities Found'}
-            </h3>
-            
             {opportunities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-6">
-                <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
-                  <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">
-                    calendar_month
-                  </span>
+              <>
+                <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                  No Opportunities Found
+                </h3>
+                <div className="flex flex-col items-center justify-center py-12 px-6">
+                  <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                    <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">
+                      calendar_month
+                    </span>
+                  </div>
+                  <p className="text-slate-500 dark:text-slate-400 text-center max-w-[240px]">
+                    Add some holidays to your list to see leave planning suggestions.
+                  </p>
+                  <button
+                    onClick={() => navigate('/browse')}
+                    className="mt-4 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold text-sm active:scale-95 transition-transform"
+                  >
+                    Browse Holidays
+                  </button>
                 </div>
-                <p className="text-slate-500 dark:text-slate-400 text-center max-w-[240px]">
-                  Add some holidays to your list to see leave planning suggestions.
-                </p>
-                <button
-                  onClick={() => navigate('/browse')}
-                  className="mt-4 px-5 py-2.5 bg-primary text-white rounded-xl font-semibold text-sm active:scale-95 transition-transform"
-                >
-                  Browse Holidays
-                </button>
-              </div>
+              </>
             ) : (
-              <div className="flex flex-col gap-4">
-                {opportunities.map((opp) => {
-                  const colors = getEfficiencyColor(opp.efficiency);
-                  const holidayDay = dayNames[opp.holidayDate.getDay()];
-                  const isSelected = selectedOpportunities.has(opp.id);
-                  const requiresLeave = opp.leaveDays.length > 0;
-                  const canSelect = !requiresLeave || isSelected || remainingLeaveDays >= opp.leaveDays.length;
-                  
-                  return (
-                    <div 
-                      key={opp.id}
-                      onClick={() => requiresLeave && canSelect && toggleOpportunity(opp.id, opp.leaveDays.length)}
-                      className={`
-                        ${colors.bg} rounded-2xl p-4 border-2 shadow-sm transition-all
-                        ${isSelected 
-                          ? 'border-primary dark:border-primary ring-2 ring-primary/20 shadow-md' 
-                          : 'border-white/50 dark:border-white/5'
-                        }
-                        ${requiresLeave && canSelect ? 'cursor-pointer active:scale-[0.98]' : ''}
-                        ${requiresLeave && !canSelect && !isSelected ? 'opacity-50' : ''}
-                      `}
-                    >
-                      {/* Header */}
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-start gap-3 flex-1">
-                          {/* Selection indicator */}
-                          {requiresLeave && (
-                            <div className={`
-                              mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
-                              ${isSelected 
-                                ? 'bg-primary border-primary' 
-                                : canSelect 
-                                  ? 'border-slate-300 dark:border-slate-600' 
-                                  : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800'
-                              }
-                            `}>
-                              {isSelected && (
-                                <span className="material-symbols-outlined text-white text-sm">check</span>
-                              )}
+              <>
+                {/* Selected Opportunities - Compact Stacked Group */}
+                {selectedOps.length > 0 && (
+                  <div className="mb-6">
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
+                      <span className="material-symbols-outlined text-primary text-lg">check_circle</span>
+                      Your Planned Leave ({selectedOps.length})
+                    </h3>
+                    <div className="bg-gradient-to-br from-primary/5 to-indigo-500/5 dark:from-primary/10 dark:to-indigo-500/10 rounded-2xl border-2 border-primary/20 dark:border-primary/30 overflow-hidden">
+                      {selectedOps.map((opp, index) => {
+                        const isLast = index === selectedOps.length - 1;
+                        
+                        return (
+                          <div 
+                            key={opp.id}
+                            onClick={() => toggleOpportunity(opp.id, opp.leaveDays.length)}
+                            className={`
+                              flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-primary/10 transition-colors
+                              ${!isLast ? 'border-b border-primary/10 dark:border-primary/20' : ''}
+                            `}
+                          >
+                            {/* Check icon */}
+                            <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0">
+                              <span className="material-symbols-outlined text-white text-sm">check</span>
                             </div>
-                          )}
-                          <div>
-                            <h4 className="font-bold text-slate-900 dark:text-white text-base">
-                              {opp.holiday.name}
-                            </h4>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">
-                              {holidayDay}, {opp.holidayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <div className={`${colors.badge} px-2.5 py-1 rounded-lg text-xs font-bold`}>
-                            {opp.totalDaysOff} days off
-                          </div>
-                          {requiresLeave && (
-                            <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
-                              {opp.leaveDays.length} leave
+                            
+                            {/* Holiday info */}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-slate-900 dark:text-white text-sm truncate">
+                                {opp.holiday.name}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">
+                                {formatDateRange(opp.startDate, opp.endDate)}
+                              </p>
+                            </div>
+                            
+                            {/* Stats */}
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className="text-xs font-bold text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-500/20 px-2 py-0.5 rounded">
+                                {opp.leaveDays.length}L
+                              </span>
+                              <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                                {opp.totalDaysOff}D
+                              </span>
+                            </div>
+                            
+                            {/* Remove hint */}
+                            <span className="material-symbols-outlined text-slate-400 dark:text-slate-500 text-lg">
+                              close
                             </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      {/* Description */}
-                      <p className={`text-sm font-medium ${colors.text} mb-3 ${requiresLeave ? 'ml-9' : ''}`}>
-                        {opp.description}
-                      </p>
-                      
-                      {/* Calendar visualization */}
-                      <div className={`bg-white/60 dark:bg-white/5 rounded-xl p-3 ${requiresLeave ? 'ml-9' : ''}`}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                            {formatDateRange(opp.startDate, opp.endDate)}
-                          </span>
-                        </div>
-                        
-                        {/* Day pills */}
-                        <div className="flex gap-1 flex-wrap">
-                          {Array.from({ length: Math.ceil((opp.endDate.getTime() - opp.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1 }).map((_, i) => {
-                            const date = addDays(opp.startDate, i);
-                            const isHoliday = isSameDay(date, opp.holidayDate);
-                            const isLeaveDay = opp.leaveDays.some(ld => isSameDay(ld, date));
-                            const isWeekendDay = isWeekend(date);
-                            
-                            let bgColor = 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
-                            if (isHoliday) {
-                              bgColor = 'bg-primary text-white';
-                            } else if (isLeaveDay) {
-                              bgColor = isSelected 
-                                ? 'bg-amber-400 dark:bg-amber-500 text-white' 
-                                : 'bg-amber-200 dark:bg-amber-500/40 text-amber-700 dark:text-amber-300';
-                            } else if (isWeekendDay) {
-                              bgColor = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400';
-                            }
-                            
-                            return (
-                              <div
-                                key={i}
-                                className={`${bgColor} px-2 py-1 rounded-md text-xs font-semibold min-w-[36px] text-center`}
-                                title={date.toLocaleDateString()}
-                              >
-                                {shortDayNames[date.getDay()]}
-                              </div>
-                            );
-                          })}
-                        </div>
-                        
-                        {/* Legend */}
-                        <div className="flex gap-3 mt-3 text-[10px] text-slate-500 dark:text-slate-400">
-                          <div className="flex items-center gap-1">
-                            <div className="w-2.5 h-2.5 rounded bg-primary"></div>
-                            <span>Holiday</span>
                           </div>
-                          {opp.leaveDays.length > 0 && (
-                            <div className="flex items-center gap-1">
-                              <div className="w-2.5 h-2.5 rounded bg-amber-400 dark:bg-amber-500"></div>
-                              <span>Leave</span>
-                            </div>
-                          )}
-                          <div className="flex items-center gap-1">
-                            <div className="w-2.5 h-2.5 rounded bg-emerald-100 dark:bg-emerald-500/20"></div>
-                            <span>Weekend</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Disabled message */}
-                      {requiresLeave && !canSelect && !isSelected && (
-                        <p className="text-xs text-red-500 dark:text-red-400 mt-2 ml-9">
-                          Not enough leave days remaining
-                        </p>
-                      )}
+                        );
+                      })}
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                )}
+                
+                {/* Unselected Opportunities - Full Cards */}
+                {unselectedOps.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                      {selectedOps.length > 0 ? 'More Opportunities' : 'Select Your Long Weekends'}
+                    </h3>
+                    <div className="flex flex-col gap-4">
+                      {unselectedOps.map((opp) => {
+                        const colors = getEfficiencyColor(opp.efficiency);
+                        const holidayDay = dayNames[opp.holidayDate.getDay()];
+                        const requiresLeave = opp.leaveDays.length > 0;
+                        const canSelect = !requiresLeave || remainingLeaveDays >= opp.leaveDays.length;
+                        
+                        return (
+                          <div 
+                            key={opp.id}
+                            onClick={() => requiresLeave && canSelect && toggleOpportunity(opp.id, opp.leaveDays.length)}
+                            className={`
+                              ${colors.bg} rounded-2xl p-4 border-2 shadow-sm transition-all
+                              border-white/50 dark:border-white/5
+                              ${requiresLeave && canSelect ? 'cursor-pointer active:scale-[0.98]' : ''}
+                              ${requiresLeave && !canSelect ? 'opacity-50' : ''}
+                            `}
+                          >
+                            {/* Header */}
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex items-start gap-3 flex-1">
+                                {/* Selection indicator */}
+                                {requiresLeave && (
+                                  <div className={`
+                                    mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-all
+                                    ${canSelect 
+                                      ? 'border-slate-300 dark:border-slate-600' 
+                                      : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800'
+                                    }
+                                  `} />
+                                )}
+                                <div>
+                                  <h4 className="font-bold text-slate-900 dark:text-white text-base">
+                                    {opp.holiday.name}
+                                  </h4>
+                                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    {holidayDay}, {opp.holidayDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1">
+                                <div className={`${colors.badge} px-2.5 py-1 rounded-lg text-xs font-bold`}>
+                                  {opp.totalDaysOff} days off
+                                </div>
+                                {requiresLeave && (
+                                  <span className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                                    {opp.leaveDays.length} leave
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Description */}
+                            <p className={`text-sm font-medium ${colors.text} mb-3 ${requiresLeave ? 'ml-9' : ''}`}>
+                              {opp.description}
+                            </p>
+                            
+                            {/* Calendar visualization */}
+                            <div className={`bg-white/60 dark:bg-white/5 rounded-xl p-3 ${requiresLeave ? 'ml-9' : ''}`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                                  {formatDateRange(opp.startDate, opp.endDate)}
+                                </span>
+                              </div>
+                              
+                              {/* Day pills */}
+                              <div className="flex gap-1 flex-wrap">
+                                {Array.from({ length: Math.ceil((opp.endDate.getTime() - opp.startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1 }).map((_, i) => {
+                                  const date = addDays(opp.startDate, i);
+                                  const isHoliday = isSameDay(date, opp.holidayDate);
+                                  const isLeaveDay = opp.leaveDays.some(ld => isSameDay(ld, date));
+                                  const isWeekendDay = isWeekend(date);
+                                  
+                                  let bgColor = 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
+                                  if (isHoliday) {
+                                    bgColor = 'bg-primary text-white';
+                                  } else if (isLeaveDay) {
+                                    bgColor = 'bg-amber-200 dark:bg-amber-500/40 text-amber-700 dark:text-amber-300';
+                                  } else if (isWeekendDay) {
+                                    bgColor = 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400';
+                                  }
+                                  
+                                  return (
+                                    <div
+                                      key={i}
+                                      className={`${bgColor} px-2 py-1 rounded-md text-xs font-semibold min-w-[36px] text-center`}
+                                      title={date.toLocaleDateString()}
+                                    >
+                                      {shortDayNames[date.getDay()]}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              
+                              {/* Legend */}
+                              <div className="flex gap-3 mt-3 text-[10px] text-slate-500 dark:text-slate-400">
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2.5 h-2.5 rounded bg-primary"></div>
+                                  <span>Holiday</span>
+                                </div>
+                                {opp.leaveDays.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    <div className="w-2.5 h-2.5 rounded bg-amber-200 dark:bg-amber-500/40"></div>
+                                    <span>Leave</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-1">
+                                  <div className="w-2.5 h-2.5 rounded bg-emerald-100 dark:bg-emerald-500/20"></div>
+                                  <span>Weekend</span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Disabled message */}
+                            {requiresLeave && !canSelect && (
+                              <p className="text-xs text-red-500 dark:text-red-400 mt-2 ml-9">
+                                Not enough leave days remaining
+                              </p>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </>
             )}
           </div>
           
