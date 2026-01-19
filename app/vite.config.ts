@@ -5,5 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  base: '/calendar-countdown-vite/',
+  // Use root path for Telegram Mini App deployment
+  // Change to specific path if deploying to a subdirectory
+  base: '/',
 })

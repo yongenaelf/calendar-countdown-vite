@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { MemoryRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   WelcomeScreen,
   HolidayListScreen,
@@ -9,12 +10,42 @@ import {
   WidgetConfigScreen,
   LeavePlannerScreen,
 } from './screens';
-import { HolidaysProvider } from './context';
+import { HolidaysProvider, useTelegram } from './context';
+
+// Component to handle Telegram back button
+function TelegramBackButtonHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { isTelegram, showBackButton, hideBackButton, onBackButtonClick } = useTelegram();
+
+  useEffect(() => {
+    if (!isTelegram) return;
+
+    // Show back button on all pages except root
+    const isRootPath = location.pathname === '/' || location.pathname === '';
+    
+    if (isRootPath) {
+      hideBackButton();
+    } else {
+      showBackButton();
+    }
+
+    // Handle back button click
+    const cleanup = onBackButtonClick(() => {
+      navigate(-1);
+    });
+
+    return cleanup;
+  }, [isTelegram, location.pathname, navigate, showBackButton, hideBackButton, onBackButtonClick]);
+
+  return null;
+}
 
 function App() {
   return (
-    <BrowserRouter basename="/calendar-countdown-vite">
+    <MemoryRouter initialEntries={['/']}>
       <HolidaysProvider>
+        <TelegramBackButtonHandler />
         <Routes>
           <Route path="/" element={<WelcomeScreen />} />
           <Route path="/holidays" element={<HolidayListScreen />} />
@@ -27,7 +58,7 @@ function App() {
           <Route path="/leave-planner" element={<LeavePlannerScreen />} />
         </Routes>
       </HolidaysProvider>
-    </BrowserRouter>
+    </MemoryRouter>
   );
 }
 

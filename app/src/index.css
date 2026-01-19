@@ -51,6 +51,21 @@
   --shadow-card: 0 4px 15px -2px rgba(0, 0, 0, 0.03);
   --shadow-glow: 0 0 20px rgba(251, 146, 60, 0.4);
   --shadow-dark-glow: 0 0 30px rgba(34, 211, 238, 0.15);
+  
+  /* Telegram CSS Variables - used when available */
+  --color-tg-bg: var(--tg-theme-bg-color, #F8FAFC);
+  --color-tg-text: var(--tg-theme-text-color, #1e293b);
+  --color-tg-hint: var(--tg-theme-hint-color, #64748b);
+  --color-tg-link: var(--tg-theme-link-color, #22D3EE);
+  --color-tg-button: var(--tg-theme-button-color, #22D3EE);
+  --color-tg-button-text: var(--tg-theme-button-text-color, #ffffff);
+  --color-tg-secondary-bg: var(--tg-theme-secondary-bg-color, #e2e8f0);
+  --color-tg-header-bg: var(--tg-theme-header-bg-color, #F8FAFC);
+  --color-tg-accent: var(--tg-theme-accent-text-color, #22D3EE);
+  --color-tg-section-bg: var(--tg-theme-section-bg-color, #ffffff);
+  --color-tg-section-header: var(--tg-theme-section-header-text-color, #64748b);
+  --color-tg-subtitle: var(--tg-theme-subtitle-text-color, #64748b);
+  --color-tg-destructive: var(--tg-theme-destructive-text-color, #ef4444);
 }
 
 /* Base styles */
@@ -61,8 +76,20 @@ html {
 body {
   margin: 0;
   min-height: 100dvh;
+  min-height: var(--tg-viewport-stable-height, 100dvh);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Use Telegram background color when available */
+  background-color: var(--tg-theme-bg-color, inherit);
+}
+
+/* Telegram-specific overrides when in Telegram environment */
+.tg-app {
+  /* Override colors with Telegram theme colors */
+  --color-background-light: var(--tg-theme-bg-color, #F8FAFC);
+  --color-surface-light: var(--tg-theme-secondary-bg-color, #FFFFFF);
+  --color-background-dark: var(--tg-theme-bg-color, #0B1120);
+  --color-surface-dark: var(--tg-theme-secondary-bg-color, #131C2C);
 }
 
 /* Material Symbols configuration */

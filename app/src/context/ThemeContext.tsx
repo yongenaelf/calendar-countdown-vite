@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { useTelegram } from './TelegramContext';
 
 type Theme = 'light' | 'dark';
 
@@ -13,8 +14,10 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_KEY = 'calendar-countdown-theme';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
+  const { isTelegram, isDark: telegramIsDark, isReady: telegramReady } = useTelegram();
+  
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Check localStorage first
+    // Check localStorage first (for non-Telegram environment)
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(THEME_KEY);
       if (stored === 'light' || stored === 'dark') {
@@ -28,6 +31,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'light';
   });
 
+  // Sync with Telegram theme when in Telegram environment
+  useEffect(() => {
+    if (isTelegram && telegramReady) {
+      setThemeState(telegramIsDark ? 'dark' : 'light');
+    }
+  }, [isTelegram, telegramIsDark, telegramReady]);
+
   useEffect(() => {
     const root = window.document.documentElement;
     
@@ -37,11 +47,16 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.remove('dark');
     }
     
-    localStorage.setItem(THEME_KEY, theme);
-  }, [theme]);
+    // Only save to localStorage if not in Telegram
+    if (!isTelegram) {
+      localStorage.setItem(THEME_KEY, theme);
+    }
+  }, [theme, isTelegram]);
 
-  // Listen to system preference changes
+  // Listen to system preference changes (only when not in Telegram)
   useEffect(() => {
+    if (isTelegram) return;
+    
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
     const handleChange = (e: MediaQueryListEvent) => {
@@ -54,13 +69,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
+  }, [isTelegram]);
 
   const toggleTheme = () => {
+    // In Telegram, theme is controlled by Telegram app
+    if (isTelegram) return;
     setThemeState(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   const setTheme = (newTheme: Theme) => {
+    // In Telegram, theme is controlled by Telegram app
+    if (isTelegram) return;
     setThemeState(newTheme);
   };
 
