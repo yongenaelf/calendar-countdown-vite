@@ -132,7 +132,7 @@ const Presentation = () => (
               <Text fontSize="32px" style={{ marginBottom: '6px' }}>🌍</Text>
               <Text fontSize="20px" color="tertiary" fontWeight="bold">Holiday Confusion</Text>
               <Text fontSize="15px" color="quaternary" style={{ marginTop: '5px' }}>
-                Hard to track holidays across cultures & religions
+                Hard to track holidays across different cultures
               </Text>
             </Box>
           </Appear>

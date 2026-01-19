@@ -8,7 +8,6 @@ import type { Holiday } from '../types/holiday';
 
 // Default images for different categories
 const categoryImages: Record<string, string> = {
-  religious: 'https://images.unsplash.com/photo-1482517967863-00e15c9b44be?w=800&q=80',
   celebration: 'https://images.unsplash.com/photo-1496843916299-590492c751f4?w=800&q=80',
   birthday: 'https://images.unsplash.com/photo-1558636508-e0db3814bd1d?w=800&q=80',
   travel: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800&q=80',

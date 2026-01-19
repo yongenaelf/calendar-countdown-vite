@@ -325,7 +325,7 @@ export function ImportHolidaysScreen() {
                 iconBg="bg-yellow-50 dark:bg-yellow-500/20"
                 iconColor="text-yellow-500 dark:text-yellow-400"
                 title="Holiday Library"
-                subtitle="Browse by country or religion"
+                subtitle="Browse by country"
                 onClick={() => navigate('/browse')}
               />
             </div>

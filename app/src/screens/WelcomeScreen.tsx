@@ -110,7 +110,7 @@ export function WelcomeScreen() {
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-0.5">Explore Holidays</h3>
-                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Quick add by Country & Religion</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">Quick add by Country</p>
               </div>
             </div>
             <div className="flex items-center gap-4 p-4 rounded-[1.25rem] bg-white dark:bg-surface-dark border border-slate-50 dark:border-white/5 shadow-card dark:shadow-none hover:shadow-soft dark:hover:bg-surface-dark-elevated hover:scale-[1.01] transition-all duration-300 group cursor-default">

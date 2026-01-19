@@ -5,7 +5,7 @@ export interface Holiday {
   name: string;
   date: Date;
   icon: string;
-  category: 'celebration' | 'travel' | 'birthday' | 'religious' | 'custom';
+  category: 'celebration' | 'travel' | 'birthday' | 'custom';
   description?: string;
   recurrence?: 'none' | 'yearly' | 'monthly' | 'weekly';
   source?: string;

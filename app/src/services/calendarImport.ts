@@ -15,9 +15,6 @@ function detectCategory(summary: string, description?: string): Holiday['categor
   if (text.includes('travel') || text.includes('trip') || text.includes('vacation') || text.includes('flight') || text.includes('hotel')) {
     return 'travel';
   }
-  if (text.includes('christmas') || text.includes('easter') || text.includes('ramadan') || text.includes('diwali') || text.includes('hanukkah') || text.includes('eid')) {
-    return 'religious';
-  }
   if (text.includes('holiday') || text.includes('celebration') || text.includes('party') || text.includes('anniversary')) {
     return 'celebration';
   }
@@ -32,8 +29,6 @@ function getIconForCategory(category: Holiday['category']): string {
       return 'cake';
     case 'travel':
       return 'flight';
-    case 'religious':
-      return 'temple_buddhist';
     case 'celebration':
       return 'celebration';
     default:
@@ -303,7 +298,7 @@ export function parseCSVFile(content: string): CSVParseResult {
     // Determine category
     let category: Holiday['category'] = 'custom';
     if (categoryStr) {
-      if (['celebration', 'travel', 'birthday', 'religious', 'custom'].includes(categoryStr)) {
+      if (['celebration', 'travel', 'birthday', 'custom'].includes(categoryStr)) {
         category = categoryStr as Holiday['category'];
       } else {
         result.warnings.push(`Row ${rowNum}: Unknown category "${categoryStr}" for "${name}", using "custom"`);

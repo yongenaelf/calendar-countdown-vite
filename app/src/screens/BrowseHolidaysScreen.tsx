@@ -251,7 +251,6 @@ export function BrowseHolidaysScreen() {
   const navigate = useNavigate();
   const { addHoliday, clearAllHolidays } = useHolidays();
   const { user, initData, isTelegram } = useTelegram();
-  const [selectedTab, setSelectedTab] = useState<'countries' | 'religions'>('countries');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isImporting, setIsImporting] = useState(false);
@@ -471,37 +470,6 @@ export function BrowseHolidaysScreen() {
             </div>
           </div>
           
-          {/* Tabs */}
-          <div className="px-4 pb-4">
-            <div className="flex h-12 w-full items-center justify-center rounded-2xl bg-slate-100/80 dark:bg-surface-dark p-1.5 shadow-inner dark:shadow-none backdrop-blur-sm ring-1 ring-black/5 dark:ring-white/5">
-              <label className={`relative flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-xl px-2 transition-all text-sm font-bold leading-normal group ${selectedTab === 'countries' ? 'bg-white dark:bg-surface-dark-elevated shadow-sm text-joy-orange dark:text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
-                <span className="z-10 flex items-center gap-2 transition-transform group-active:scale-95">
-                  <span className="material-symbols-outlined text-[20px]">public</span>
-                  Countries
-                </span>
-                <input 
-                  type="radio" 
-                  name="category-selector"
-                  checked={selectedTab === 'countries'}
-                  onChange={() => setSelectedTab('countries')}
-                  className="peer invisible w-0 absolute"
-                />
-              </label>
-              <label className={`relative flex cursor-pointer h-full grow items-center justify-center overflow-hidden rounded-xl px-2 transition-all text-sm font-bold leading-normal group ${selectedTab === 'religions' ? 'bg-white dark:bg-surface-dark-elevated shadow-sm text-joy-pink dark:text-primary' : 'text-slate-500 dark:text-slate-400'}`}>
-                <span className="z-10 flex items-center gap-2 transition-transform group-active:scale-95">
-                  <span className="material-symbols-outlined text-[20px]">diversity_3</span>
-                  Religions
-                </span>
-                <input 
-                  type="radio" 
-                  name="category-selector"
-                  checked={selectedTab === 'religions'}
-                  onChange={() => setSelectedTab('religions')}
-                  className="peer invisible w-0 absolute"
-                />
-              </label>
-            </div>
-          </div>
           
           {/* Search */}
           <div className="px-4 pb-4">
