@@ -12,12 +12,21 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_KEY = 'calendar-countdown-theme';
+const THEME_OVERRIDE_KEY = 'calendar-countdown-theme-override';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const { isTelegram, isDark: telegramIsDark, isReady: telegramReady } = useTelegram();
   
+  // Track if user has manually overridden the theme
+  const [hasUserOverride, setHasUserOverride] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(THEME_OVERRIDE_KEY) === 'true';
+    }
+    return false;
+  });
+  
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Check localStorage first (for non-Telegram environment)
+    // Check localStorage first
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(THEME_KEY);
       if (stored === 'light' || stored === 'dark') {
@@ -31,12 +40,12 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return 'light';
   });
 
-  // Sync with Telegram theme when in Telegram environment
+  // Sync with Telegram theme when in Telegram environment (only if user hasn't overridden)
   useEffect(() => {
-    if (isTelegram && telegramReady) {
+    if (isTelegram && telegramReady && !hasUserOverride) {
       setThemeState(telegramIsDark ? 'dark' : 'light');
     }
-  }, [isTelegram, telegramIsDark, telegramReady]);
+  }, [isTelegram, telegramIsDark, telegramReady, hasUserOverride]);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -47,11 +56,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.remove('dark');
     }
     
-    // Only save to localStorage if not in Telegram
-    if (!isTelegram) {
-      localStorage.setItem(THEME_KEY, theme);
-    }
-  }, [theme, isTelegram]);
+    // Save to localStorage
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
   // Listen to system preference changes (only when not in Telegram)
   useEffect(() => {
@@ -72,14 +79,20 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [isTelegram]);
 
   const toggleTheme = () => {
-    // In Telegram, theme is controlled by Telegram app
-    if (isTelegram) return;
+    // Mark that user has manually overridden the theme
+    if (isTelegram) {
+      setHasUserOverride(true);
+      localStorage.setItem(THEME_OVERRIDE_KEY, 'true');
+    }
     setThemeState(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   const setTheme = (newTheme: Theme) => {
-    // In Telegram, theme is controlled by Telegram app
-    if (isTelegram) return;
+    // Mark that user has manually overridden the theme
+    if (isTelegram) {
+      setHasUserOverride(true);
+      localStorage.setItem(THEME_OVERRIDE_KEY, 'true');
+    }
     setThemeState(newTheme);
   };
 
