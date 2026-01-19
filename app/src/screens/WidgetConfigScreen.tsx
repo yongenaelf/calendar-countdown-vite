@@ -250,7 +250,7 @@ export function WidgetConfigScreen() {
         </main>
         
         {/* Footer */}
-        <footer className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 p-4 bg-white/10 dark:bg-black/40 backdrop-blur-2xl border-t border-white/20 dark:border-white/10 z-30">
+        <footer className="fixed bottom-0 w-full max-w-md left-1/2 -translate-x-1/2 p-4 safe-area-bottom bg-white/10 dark:bg-black/40 backdrop-blur-2xl border-t border-white/20 dark:border-white/10 z-30">
           <Button className="w-full" size="md" icon="add_circle">
             Add Widget
           </Button>

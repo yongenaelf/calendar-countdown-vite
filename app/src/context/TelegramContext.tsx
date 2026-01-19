@@ -140,8 +140,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(true); // Always ready - don't block rendering
   const [isDark, setIsDark] = useState(() => webApp?.colorScheme === 'dark');
   const [themeParams, setThemeParams] = useState<TelegramThemeParams | null>(() => webApp?.themeParams ?? null);
-  const [safeAreaInsets] = useState(() => webApp?.safeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 });
-  const [contentSafeAreaInsets] = useState(() => webApp?.contentSafeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 });
+  const [safeAreaInsets, setSafeAreaInsets] = useState(() => webApp?.safeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 });
+  const [contentSafeAreaInsets, setContentSafeAreaInsets] = useState(() => webApp?.contentSafeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 });
   const [user] = useState<TelegramUser | null>(() => webApp?.initDataUnsafe?.user ?? null);
   const [initData] = useState(() => webApp?.initData ?? '');
 
@@ -165,6 +165,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       // Log feature availability
       console.log('[TelegramContext] BackButton available:', isVersionAtLeast(webApp.version, '6.1'));
       console.log('[TelegramContext] MainButton available:', !!webApp.MainButton);
+      console.log('[TelegramContext] SafeAreaInset:', webApp.safeAreaInset);
+      console.log('[TelegramContext] ContentSafeAreaInset:', webApp.contentSafeAreaInset);
       
       setIsReady(true);
     } catch (error) {
@@ -178,10 +180,29 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
       setThemeParams(webApp.themeParams);
     };
 
+    // Listen for safe area changes (available in Telegram WebApp 7.7+)
+    const handleSafeAreaChange = () => {
+      console.log('[TelegramContext] Safe area changed:', webApp.safeAreaInset);
+      if (webApp.safeAreaInset) {
+        setSafeAreaInsets(webApp.safeAreaInset);
+      }
+    };
+
+    const handleContentSafeAreaChange = () => {
+      console.log('[TelegramContext] Content safe area changed:', webApp.contentSafeAreaInset);
+      if (webApp.contentSafeAreaInset) {
+        setContentSafeAreaInsets(webApp.contentSafeAreaInset);
+      }
+    };
+
     webApp.onEvent('themeChanged', handleThemeChange);
+    webApp.onEvent('safeAreaChanged', handleSafeAreaChange);
+    webApp.onEvent('contentSafeAreaChanged', handleContentSafeAreaChange);
 
     return () => {
       webApp.offEvent('themeChanged', handleThemeChange);
+      webApp.offEvent('safeAreaChanged', handleSafeAreaChange);
+      webApp.offEvent('contentSafeAreaChanged', handleContentSafeAreaChange);
     };
   }, [webApp]);
 

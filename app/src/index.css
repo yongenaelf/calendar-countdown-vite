@@ -83,6 +83,28 @@ body {
   background-color: var(--tg-theme-bg-color, inherit);
 }
 
+/* Safe area inset fallback using CSS env() for non-Telegram or older Telegram versions */
+.safe-area-inset {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Safe area utilities for fixed/absolute positioned elements */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* For elements that need bottom offset (like FABs) */
+.bottom-safe {
+  bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+
 /* Telegram-specific overrides when in Telegram environment */
 .tg-app {
   /* Override colors with Telegram theme colors */

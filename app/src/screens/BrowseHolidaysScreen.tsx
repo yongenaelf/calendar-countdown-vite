@@ -587,7 +587,7 @@ export function BrowseHolidaysScreen() {
       </MobileContainer>
       
       {/* Footer CTA - Outside MobileContainer for proper fixed positioning */}
-      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 p-4 pt-6 bg-gradient-to-t from-white dark:from-background-dark via-white/95 dark:via-background-dark/95 to-transparent">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md z-50 p-4 pt-6 safe-area-bottom bg-gradient-to-t from-white dark:from-background-dark via-white/95 dark:via-background-dark/95 to-transparent">
         <Button 
           className="w-full" 
           size="md" 

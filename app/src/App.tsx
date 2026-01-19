@@ -12,6 +12,17 @@ import {
 } from './screens';
 import { HolidaysProvider, useTelegram } from './context';
 
+// Component to scroll to top on route change
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 // Component to handle Telegram back button
 function TelegramBackButtonHandler() {
   const navigate = useNavigate();
@@ -45,6 +56,7 @@ function App() {
   return (
     <MemoryRouter initialEntries={['/']}>
       <HolidaysProvider>
+        <ScrollToTop />
         <TelegramBackButtonHandler />
         <Routes>
           <Route path="/" element={<WelcomeScreen />} />

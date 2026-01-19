@@ -387,7 +387,7 @@ export function HolidayListScreen() {
       </MobileContainer>
 
       {/* FAB - Fixed position to always be visible */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none z-30">
+      <div className="fixed bottom-safe left-1/2 -translate-x-1/2 w-full max-w-md pointer-events-none z-30">
         <div className="relative w-full h-0">
           <button 
             onClick={() => navigate('/add')}

@@ -663,7 +663,7 @@ export function AddHolidayScreen() {
               </div>
               
               {/* Safe area padding */}
-              <div className="h-8" />
+              <div className="h-2 safe-area-bottom" />
             </div>
           </div>
         )}
@@ -738,7 +738,7 @@ export function AddHolidayScreen() {
               </div>
               
               {/* Safe area padding */}
-              <div className="h-8" />
+              <div className="h-2 safe-area-bottom" />
             </div>
           </div>
         )}
