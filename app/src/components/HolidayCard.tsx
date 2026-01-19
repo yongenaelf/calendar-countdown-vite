@@ -179,7 +179,7 @@ export function HolidayCard({ holiday, effectiveDate, variant = 'standard' }: Ho
         </div>
         
         {/* Reminder indicator */}
-        {holiday.reminder && (
+        {holiday.reminderOption && holiday.reminderOption !== 'none' && (
           <div className="mt-3 flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm">
             <span className="material-symbols-outlined text-[16px]">notifications_active</span>
             <span className="font-medium">Reminder set</span>

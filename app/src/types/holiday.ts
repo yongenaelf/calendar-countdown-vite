@@ -1,3 +1,5 @@
+export type ReminderOption = 'none' | 'on_day' | '1_day' | '3_days' | '1_week' | '2_weeks';
+
 export interface Holiday {
   id: string;
   name: string;
@@ -8,7 +10,7 @@ export interface Holiday {
   recurrence?: 'none' | 'yearly' | 'monthly' | 'weekly';
   source?: string;
   color: 'emerald' | 'sky' | 'indigo' | 'teal' | 'pink' | 'orange';
-  reminder?: boolean; // Whether a reminder is set for this event
+  reminderOption?: ReminderOption; // Reminder setting for this event
 }
 
 export interface CountdownTime {

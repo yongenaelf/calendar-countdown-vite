@@ -17,6 +17,22 @@ interface TelegramThemeParams {
   destructive_text_color?: string;
 }
 
+interface TelegramUser {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  language_code?: string;
+}
+
+interface TelegramInitData {
+  user?: TelegramUser;
+  chat_instance?: string;
+  chat_type?: string;
+  auth_date?: number;
+  hash?: string;
+}
+
 interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
@@ -27,6 +43,8 @@ interface TelegramWebApp {
   viewportHeight: number;
   viewportStableHeight: number;
   isExpanded: boolean;
+  initData: string;
+  initDataUnsafe: TelegramInitData;
   BackButton?: {
     isVisible: boolean;
     show: () => void;
@@ -86,6 +104,8 @@ interface TelegramContextType {
   isTelegram: boolean;
   themeParams: TelegramThemeParams | null;
   isDark: boolean;
+  user: TelegramUser | null;
+  initData: string;
   showBackButton: () => void;
   hideBackButton: () => void;
   onBackButtonClick: (callback: () => void) => () => void;
@@ -122,6 +142,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
   const [themeParams, setThemeParams] = useState<TelegramThemeParams | null>(() => webApp?.themeParams ?? null);
   const [safeAreaInsets] = useState(() => webApp?.safeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 });
   const [contentSafeAreaInsets] = useState(() => webApp?.contentSafeAreaInset ?? { top: 0, bottom: 0, left: 0, right: 0 });
+  const [user] = useState<TelegramUser | null>(() => webApp?.initDataUnsafe?.user ?? null);
+  const [initData] = useState(() => webApp?.initData ?? '');
 
   useEffect(() => {
     if (!webApp) {
@@ -206,6 +228,8 @@ export function TelegramProvider({ children }: { children: ReactNode }) {
         isTelegram,
         themeParams,
         isDark,
+        user,
+        initData,
         showBackButton,
         hideBackButton,
         onBackButtonClick,

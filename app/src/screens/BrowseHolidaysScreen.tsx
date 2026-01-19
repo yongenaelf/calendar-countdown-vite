@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import useSWR from 'swr';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { MobileContainer, IconButton, Button } from '../components';
-import { useHolidays } from '../context';
+import { useHolidays, useTelegram } from '../context';
+import { registerCountdownNotification } from '../services/notificationService';
 import { 
   fetchAvailableCountries, 
   fetchPublicHolidays, 
@@ -249,6 +250,7 @@ type ListRow =
 export function BrowseHolidaysScreen() {
   const navigate = useNavigate();
   const { addHoliday, clearAllHolidays } = useHolidays();
+  const { user, initData, isTelegram } = useTelegram();
   const [selectedTab, setSelectedTab] = useState<'countries' | 'religions'>('countries');
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -387,15 +389,20 @@ export function BrowseHolidaysScreen() {
       // Clear existing holidays first
       clearAllHolidays();
       
+      const addedHolidays = [];
+      const now = new Date();
+      
       for (const holiday of holidays) {
         // Try to get rich details from our local data
         const localDetails = getHolidayDetails(selectedCountry, holiday.name, holiday.localName);
+        const holidayDate = new Date(holiday.date);
+        const icon = localDetails?.icon || getHolidayIcon(holiday.types);
         
-        addHoliday({
+        const newHoliday = addHoliday({
           name: holiday.name,
-          date: new Date(holiday.date),
+          date: holidayDate,
           // Use local data icon/color if available, otherwise use defaults
-          icon: localDetails?.icon || getHolidayIcon(holiday.types),
+          icon,
           category: localDetails?.category || 'celebration',
           color: localDetails?.color || getRandomHolidayColor(),
           // Use rich description from local data if available
@@ -403,6 +410,33 @@ export function BrowseHolidaysScreen() {
           recurrence: 'none', // Don't auto-recur as some holidays (e.g., Chinese New Year, Easter) don't fall on the same date every year
           source: country?.name || selectedCountry,
         });
+        
+        // Track future holidays for notification
+        if (holidayDate >= now) {
+          addedHolidays.push({ ...newHoliday, icon });
+        }
+      }
+      
+      // Register notification for the next upcoming holiday
+      if (isTelegram && user && addedHolidays.length > 0) {
+        // Sort by date and get the first upcoming holiday
+        addedHolidays.sort((a, b) => a.date.getTime() - b.date.getTime());
+        const nextHoliday = addedHolidays[0];
+        
+        try {
+          await registerCountdownNotification({
+            userId: user.id,
+            holidayId: nextHoliday.id,
+            name: nextHoliday.name,
+            date: nextHoliday.date,
+            icon: nextHoliday.icon,
+            reminderOption: '1_day', // Remind 1 day before the next holiday
+            initData,
+          });
+          console.log('[BrowseHolidaysScreen] Import notification sent');
+        } catch (error) {
+          console.error('[BrowseHolidaysScreen] Failed to send import notification:', error);
+        }
       }
       
       navigate('/holidays');

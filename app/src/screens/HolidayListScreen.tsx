@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MobileContainer, IconButton, HolidayCard, NextHolidayCard } from '../components';
-import { useTheme, useHolidays } from '../context';
+import { useTheme, useHolidays, useTelegram } from '../context';
+import { clearAllCountdownNotifications } from '../services/notificationService';
 import type { Holiday } from '../types/holiday';
 
 type HolidayWithEffectiveDate = Holiday & { effectiveDate: Date };
@@ -112,7 +113,9 @@ export function HolidayListScreen() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { holidays, clearAllHolidays } = useHolidays();
+  const { user, isTelegram } = useTelegram();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   
   // Filter out past one-time events and sort by next occurrence date
   const visibleHolidays = useMemo(() => {
@@ -348,18 +351,33 @@ export function HolidayListScreen() {
                 <div className="flex gap-3 w-full">
                   <button
                     onClick={() => setShowClearConfirm(false)}
-                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold active:scale-95 transition-transform"
+                    disabled={isClearing}
+                    className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-semibold active:scale-95 transition-transform disabled:opacity-50"
                   >
                     Cancel
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
+                      setIsClearing(true);
+                      
+                      // Clear notifications if in Telegram
+                      if (isTelegram && user) {
+                        try {
+                          await clearAllCountdownNotifications(user.id);
+                          console.log('[HolidayListScreen] All notifications cleared');
+                        } catch (error) {
+                          console.error('[HolidayListScreen] Failed to clear notifications:', error);
+                        }
+                      }
+                      
                       clearAllHolidays();
+                      setIsClearing(false);
                       setShowClearConfirm(false);
                     }}
-                    className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl font-semibold active:scale-95 transition-transform"
+                    disabled={isClearing}
+                    className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl font-semibold active:scale-95 transition-transform disabled:opacity-50"
                   >
-                    Delete All
+                    {isClearing ? 'Deleting...' : 'Delete All'}
                   </button>
                 </div>
               </div>

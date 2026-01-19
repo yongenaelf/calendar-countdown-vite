@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useHolidays } from '../context';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useHolidays, useTelegram } from '../context';
+import { registerCountdownNotification, removeCountdownNotification } from '../services/notificationService';
+import type { ReminderOption } from '../types/holiday';
 
 const MONTHS = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -234,16 +236,14 @@ const REPEAT_OPTIONS = [
 
 type RepeatOption = typeof REPEAT_OPTIONS[number]['value'];
 
-const REMINDER_OPTIONS = [
+const REMINDER_OPTIONS: Array<{ value: ReminderOption; label: string; description: string; icon: string }> = [
   { value: 'none', label: 'No reminder', description: "I'll remember!", icon: 'notifications_off' },
   { value: 'on_day', label: 'On day of event', description: 'Wake up to excitement', icon: 'today' },
   { value: '1_day', label: '1 day before', description: 'Time to prepare!', icon: 'event' },
   { value: '3_days', label: '3 days before', description: 'Start the countdown', icon: 'date_range' },
   { value: '1_week', label: '1 week before', description: 'Plan ahead', icon: 'calendar_month' },
   { value: '2_weeks', label: '2 weeks before', description: 'Early bird reminder', icon: 'event_upcoming' },
-] as const;
-
-type ReminderOption = typeof REMINDER_OPTIONS[number]['value'];
+];
 
 // Color options
 const COLOR_OPTIONS: Array<'emerald' | 'sky' | 'indigo' | 'teal' | 'pink' | 'orange'> = [
@@ -266,7 +266,12 @@ const EMOJI_TO_ICON: Record<string, string> = {
 
 export function AddHolidayScreen() {
   const navigate = useNavigate();
-  const { addHoliday } = useHolidays();
+  const { id } = useParams<{ id: string }>();
+  const { addHoliday, updateHoliday, getHoliday } = useHolidays();
+  const { user, initData, isTelegram } = useTelegram();
+  
+  const isEditing = !!id;
+  const existingHoliday = isEditing ? getHoliday(id) : null;
   
   const [name, setName] = useState('');
   const [selectedEmoji] = useState('🎉');
@@ -276,6 +281,7 @@ export function AddHolidayScreen() {
   const [reminderOption, setReminderOption] = useState<ReminderOption>('on_day');
   const [showReminderSheet, setShowReminderSheet] = useState(false);
   const [notes, setNotes] = useState('');
+  const [originalReminderOption, setOriginalReminderOption] = useState<ReminderOption>('none');
   
   // Date state
   const currentDate = new Date();
@@ -286,6 +292,33 @@ export function AddHolidayScreen() {
   // Generate years array (current year + 10 years)
   const currentYear = currentDate.getFullYear();
   const years = Array.from({ length: 11 }, (_, i) => (currentYear + i).toString());
+  
+  // Load existing holiday data when editing
+  useEffect(() => {
+    if (existingHoliday) {
+      setName(existingHoliday.name);
+      setNotes(existingHoliday.description || '');
+      
+      // Set date
+      const holidayDate = new Date(existingHoliday.date);
+      setSelectedMonth(holidayDate.getMonth());
+      setSelectedDay(holidayDate.getDate() - 1);
+      const yearIndex = years.findIndex(y => parseInt(y) === holidayDate.getFullYear());
+      setSelectedYear(yearIndex >= 0 ? yearIndex : 0);
+      
+      // Set recurrence
+      if (existingHoliday.recurrence === 'none' || !existingHoliday.recurrence) {
+        setRepeatOption('never');
+      } else {
+        setRepeatOption(existingHoliday.recurrence as RepeatOption);
+      }
+      
+      // Set reminder
+      const reminder = existingHoliday.reminderOption || 'none';
+      setReminderOption(reminder);
+      setOriginalReminderOption(reminder);
+    }
+  }, [existingHoliday, years]);
   
   // Generate days based on selected month and year
   const daysInMonth = getDaysInMonth(selectedMonth, parseInt(years[selectedYear]));
@@ -300,8 +333,8 @@ export function AddHolidayScreen() {
     return repeatOption as 'yearly' | 'monthly' | 'weekly';
   };
 
-  // Handle add celebration
-  const handleAdd = () => {
+  // Handle add/edit celebration
+  const handleSave = async () => {
     if (!name.trim()) {
       // Could show an error toast here
       return;
@@ -311,16 +344,83 @@ export function AddHolidayScreen() {
     const month = selectedMonth;
     const day = clampedSelectedDay + 1; // Convert from 0-indexed to 1-indexed
     const date = new Date(year, month, day);
+    const icon = EMOJI_TO_ICON[selectedEmoji] || 'celebration';
 
-    addHoliday({
-      name: name.trim(),
-      date,
-      icon: EMOJI_TO_ICON[selectedEmoji] || 'celebration',
-      category: 'custom',
-      color: COLOR_OPTIONS[Math.floor(Math.random() * COLOR_OPTIONS.length)],
-      description: notes.trim() || undefined,
-      recurrence: getRecurrence(),
-    });
+    if (isEditing && existingHoliday) {
+      // Update existing holiday
+      updateHoliday(id!, {
+        name: name.trim(),
+        date,
+        description: notes.trim() || undefined,
+        recurrence: getRecurrence(),
+        reminderOption,
+      });
+
+      // Handle notification changes
+      if (isTelegram && user) {
+        const reminderChanged = originalReminderOption !== reminderOption;
+        
+        if (reminderChanged) {
+          // Remove old notification if it existed
+          if (originalReminderOption !== 'none') {
+            try {
+              await removeCountdownNotification(user.id, id!);
+              console.log('[AddHolidayScreen] Old notification removed');
+            } catch (error) {
+              console.error('[AddHolidayScreen] Failed to remove old notification:', error);
+            }
+          }
+          
+          // Register new notification if reminder is enabled
+          if (reminderOption !== 'none') {
+            try {
+              await registerCountdownNotification({
+                userId: user.id,
+                holidayId: id!,
+                name: name.trim(),
+                date,
+                icon: existingHoliday.icon,
+                reminderOption,
+                initData,
+              });
+              console.log('[AddHolidayScreen] New notification registered');
+            } catch (error) {
+              console.error('[AddHolidayScreen] Failed to register new notification:', error);
+            }
+          }
+        }
+      }
+    } else {
+      // Add new holiday
+      const holiday = addHoliday({
+        name: name.trim(),
+        date,
+        icon,
+        category: 'custom',
+        color: COLOR_OPTIONS[Math.floor(Math.random() * COLOR_OPTIONS.length)],
+        description: notes.trim() || undefined,
+        recurrence: getRecurrence(),
+        reminderOption,
+      });
+
+      // Register notification if in Telegram and reminder is enabled
+      if (isTelegram && user && reminderOption !== 'none') {
+        try {
+          await registerCountdownNotification({
+            userId: user.id,
+            holidayId: holiday.id,
+            name: name.trim(),
+            date,
+            icon,
+            reminderOption,
+            initData,
+          });
+          console.log('[AddHolidayScreen] Notification registered successfully');
+        } catch (error) {
+          console.error('[AddHolidayScreen] Failed to register notification:', error);
+        }
+      }
+    }
 
     navigate('/holidays');
   };
@@ -336,14 +436,14 @@ export function AddHolidayScreen() {
           Cancel
         </button>
         <h2 className="text-slate-800 dark:text-white text-[17px] font-bold leading-tight tracking-tight text-center flex-1">
-          New Celebration ✨
+          {isEditing ? 'Edit Celebration ✏️' : 'New Celebration ✨'}
         </h2>
         <button 
-          onClick={handleAdd}
+          onClick={handleSave}
           disabled={!name.trim()}
           className="bg-joy-orange text-white px-5 py-1.5 rounded-full text-[15px] font-bold shadow-lg shadow-joy-orange/30 hover:shadow-joy-orange/50 active:scale-95 transition-all shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Add
+          {isEditing ? 'Save' : 'Add'}
         </button>
       </header>
       

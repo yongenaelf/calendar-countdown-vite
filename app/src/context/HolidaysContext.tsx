@@ -8,7 +8,7 @@ const defaultHolidays: Holiday[] = [];
 
 interface HolidaysContextType {
   holidays: Holiday[];
-  addHoliday: (holiday: Omit<Holiday, 'id'>) => void;
+  addHoliday: (holiday: Omit<Holiday, 'id'>) => Holiday;
   updateHoliday: (id: string, holiday: Partial<Holiday>) => void;
   deleteHoliday: (id: string) => void;
   getHoliday: (id: string) => Holiday | undefined;
@@ -56,12 +56,13 @@ export function HolidaysProvider({ children }: { children: ReactNode }) {
     }
   }, [holidays]);
 
-  const addHoliday = (holiday: Omit<Holiday, 'id'>) => {
+  const addHoliday = (holiday: Omit<Holiday, 'id'>): Holiday => {
     const newHoliday: Holiday = {
       ...holiday,
       id: crypto.randomUUID(),
     };
     setHolidays(prev => [...prev, newHoliday]);
+    return newHoliday;
   };
 
   const updateHoliday = (id: string, updates: Partial<Holiday>) => {

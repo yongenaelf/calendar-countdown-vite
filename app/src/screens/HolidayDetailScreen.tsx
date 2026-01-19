@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MobileContainer, IconButton, Button } from '../components';
 import { useCountdown } from '../hooks/useCountdown';
-import { useHolidays } from '../context';
+import { useHolidays, useTelegram } from '../context';
+import { removeCountdownNotification } from '../services/notificationService';
 import type { Holiday } from '../types/holiday';
 
 // Default images for different categories
@@ -65,6 +66,7 @@ export function HolidayDetailScreen() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { getHoliday, deleteHoliday } = useHolidays();
+  const { user, isTelegram } = useTelegram();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   
   const holiday = getHoliday(id || '');
@@ -77,8 +79,18 @@ export function HolidayDetailScreen() {
   // Always call hooks unconditionally
   const countdown = useCountdown(effectiveDate);
   
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (id) {
+      // Remove notification reminder if in Telegram
+      if (isTelegram && user) {
+        try {
+          await removeCountdownNotification(user.id, id);
+          console.log('[HolidayDetailScreen] Notification removed');
+        } catch (error) {
+          console.error('[HolidayDetailScreen] Failed to remove notification:', error);
+        }
+      }
+      
       deleteHoliday(id);
       navigate('/holidays');
     }
