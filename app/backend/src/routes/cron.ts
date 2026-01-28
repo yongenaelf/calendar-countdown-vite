@@ -1,11 +1,7 @@
-// Cron endpoint for processing scheduled notifications
-// This should be called periodically (e.g., every hour) by an external scheduler
-// or Cloudflare Cron Trigger
+import { Router, Request, Response } from 'express';
+import type Redis from 'ioredis';
 
-interface Env {
-  COUNTDOWNS: KVNamespace;
-  BOT_TOKEN: string;
-}
+const router = Router();
 
 interface CountdownData {
   userId: number;
@@ -16,6 +12,11 @@ interface CountdownData {
   reminderOption: string;
   createdAt: string;
   lastNotified?: string;
+}
+
+// Get Redis instance from app.locals
+function getRedis(req: Request): Redis {
+  return req.app.locals.redis;
 }
 
 // Send message via Telegram Bot API
@@ -105,32 +106,37 @@ function formatNotificationMessage(name: string, daysUntil: number, icon: string
   }
 }
 
-export const onRequestGet: PagesFunction<Env> = async (context) => {
+// GET - Process scheduled notifications (cron job)
+router.get('/', async (req: Request, res: Response) => {
   // Simple auth check - you might want to use a secret token
-  const url = new URL(context.request.url);
-  const cronSecret = url.searchParams.get('secret');
-  
-  // In production, validate the secret
-  // if (cronSecret !== context.env.CRON_SECRET) {
-  //   return new Response('Unauthorized', { status: 401 });
+  // const cronSecret = req.query.secret;
+  // if (cronSecret !== process.env.CRON_SECRET) {
+  //   res.status(401).json({ error: 'Unauthorized' });
+  //   return;
   // }
 
-  if (!context.env.BOT_TOKEN) {
-    return new Response(JSON.stringify({ error: 'BOT_TOKEN not configured' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+  const botToken = process.env.BOT_TOKEN;
+  if (!botToken) {
+    res.status(500).json({ error: 'BOT_TOKEN not configured' });
+    return;
   }
 
+  const redis = getRedis(req);
   const results: { userId: number; holidayId: string; success: boolean; error?: string }[] = [];
   
   try {
-    // List all countdown keys
-    const list = await context.env.COUNTDOWNS.list({ prefix: 'countdown:' });
+    // List all countdown keys using SCAN (better than KEYS for production)
+    const keys: string[] = [];
+    let cursor = '0';
+    do {
+      const [nextCursor, foundKeys] = await redis.scan(cursor, 'MATCH', 'countdown:*', 'COUNT', 100);
+      cursor = nextCursor;
+      keys.push(...foundKeys);
+    } while (cursor !== '0');
     
-    for (const key of list.keys) {
+    for (const key of keys) {
       try {
-        const data = await context.env.COUNTDOWNS.get(key.name);
+        const data = await redis.get(key);
         if (!data) continue;
         
         const countdown: CountdownData = JSON.parse(data);
@@ -139,7 +145,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         // Skip if countdown is in the past (more than a day ago)
         if (daysUntil < 0) {
           // Optionally delete old countdowns
-          // await context.env.COUNTDOWNS.delete(key.name);
+          // await redis.del(key);
           continue;
         }
         
@@ -157,12 +163,12 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
         
         // Send notification
         const message = formatNotificationMessage(countdown.name, daysUntil, countdown.icon);
-        const success = await sendTelegramMessage(context.env.BOT_TOKEN, countdown.userId, message);
+        const success = await sendTelegramMessage(botToken, countdown.userId, message);
         
         if (success) {
           // Update lastNotified
           countdown.lastNotified = notifyKey;
-          await context.env.COUNTDOWNS.put(key.name, JSON.stringify(countdown));
+          await redis.set(key, JSON.stringify(countdown));
         }
         
         results.push({
@@ -171,28 +177,24 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
           success,
         });
       } catch (error) {
-        console.error(`Error processing countdown ${key.name}:`, error);
+        console.error(`Error processing countdown ${key}:`, error);
         results.push({
           userId: 0,
-          holidayId: key.name,
+          holidayId: key,
           success: false,
           error: String(error),
         });
       }
     }
     
-    return new Response(JSON.stringify({ 
+    res.json({ 
       processed: results.length,
       results,
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Cron error:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    res.status(500).json({ error: 'Internal server error' });
   }
-};
+});
+
+export default router;

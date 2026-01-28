@@ -1,15 +1,13 @@
-// Cloudflare Pages Function for handling countdown notifications
+import { Router, Request, Response } from 'express';
+import type Redis from 'ioredis';
 
-interface Env {
-  COUNTDOWNS: KVNamespace;
-  BOT_TOKEN: string;
-}
+const router = Router();
 
 interface CountdownData {
   userId: number;
   holidayId: string;
   name: string;
-  date: string; // ISO date string
+  date: string;
   icon: string;
   reminderOption: string;
   createdAt: string;
@@ -23,6 +21,11 @@ interface NotificationPayload {
   icon: string;
   reminderOption: string;
   initData: string;
+}
+
+// Get Redis instance from app.locals
+function getRedis(req: Request): Redis {
+  return req.app.locals.redis;
 }
 
 // Send message via Telegram Bot API
@@ -54,6 +57,23 @@ function getDaysUntil(dateStr: string): number {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
+// Map icon name to emoji
+function getEmojiFromIcon(icon: string): string {
+  const iconMap: Record<string, string> = {
+    celebration: '🎉',
+    cake: '🎂',
+    forest: '🎄',
+    flight_takeoff: '✈️',
+    diamond: '💍',
+    school: '🎓',
+    emoji_events: '🏆',
+    favorite: '❤️',
+    star: '🌟',
+    redeem: '🎁',
+  };
+  return iconMap[icon] || '🎉';
+}
+
 // Format notification message
 function formatNotificationMessage(name: string, daysUntil: number, icon: string, isPreview: boolean = false): string {
   const emoji = getEmojiFromIcon(icon);
@@ -78,37 +98,19 @@ function formatNotificationMessage(name: string, daysUntil: number, icon: string
   }
 }
 
-// Map icon name to emoji
-function getEmojiFromIcon(icon: string): string {
-  const iconMap: Record<string, string> = {
-    celebration: '🎉',
-    cake: '🎂',
-    forest: '🎄',
-    flight_takeoff: '✈️',
-    diamond: '💍',
-    school: '🎓',
-    emoji_events: '🏆',
-    favorite: '❤️',
-    star: '🌟',
-    redeem: '🎁',
-  };
-  return iconMap[icon] || '🎉';
-}
-
-// Handle POST - Register a new countdown notification
-export const onRequestPost: PagesFunction<Env> = async (context) => {
+// POST - Register a new countdown notification
+router.post('/', async (req: Request, res: Response) => {
   try {
-    const payload: NotificationPayload = await context.request.json();
-    const { userId, holidayId, name, date, icon, reminderOption, initData } = payload;
+    const redis = getRedis(req);
+    const payload: NotificationPayload = req.body;
+    const { userId, holidayId, name, date, icon, reminderOption } = payload;
     
     if (!userId || !holidayId || !name || !date) {
-      return new Response(JSON.stringify({ error: 'Missing required fields' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      res.status(400).json({ error: 'Missing required fields' });
+      return;
     }
     
-    // Store countdown in KV
+    // Store countdown in Redis
     const countdownData: CountdownData = {
       userId,
       holidayId,
@@ -120,59 +122,51 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     };
     
     const key = `countdown:${userId}:${holidayId}`;
-    await context.env.COUNTDOWNS.put(key, JSON.stringify(countdownData));
+    await redis.set(key, JSON.stringify(countdownData));
     
     // Also add to a list for the user
     const userListKey = `user:${userId}:countdowns`;
-    const existingList = await context.env.COUNTDOWNS.get(userListKey);
+    const existingList = await redis.get(userListKey);
     const countdownIds: string[] = existingList ? JSON.parse(existingList) : [];
     if (!countdownIds.includes(holidayId)) {
       countdownIds.push(holidayId);
-      await context.env.COUNTDOWNS.put(userListKey, JSON.stringify(countdownIds));
+      await redis.set(userListKey, JSON.stringify(countdownIds));
     }
     
     // Send preview notification
-    if (context.env.BOT_TOKEN) {
+    const botToken = process.env.BOT_TOKEN;
+    if (botToken) {
       const daysUntil = getDaysUntil(date);
       const message = formatNotificationMessage(name, daysUntil, icon, true);
-      await sendTelegramMessage(context.env.BOT_TOKEN, userId, message);
+      await sendTelegramMessage(botToken, userId, message);
     }
     
-    return new Response(JSON.stringify({ success: true, message: 'Countdown registered' }), {
-      status: 200,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    res.json({ success: true, message: 'Countdown registered' });
   } catch (error) {
     console.error('Error registering countdown:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    res.status(500).json({ error: 'Internal server error' });
   }
-};
+});
 
-// Handle DELETE - Remove a countdown notification (or all for a user)
-export const onRequestDelete: PagesFunction<Env> = async (context) => {
+// DELETE - Remove a countdown notification (or all for a user)
+router.delete('/', async (req: Request, res: Response) => {
   try {
-    const url = new URL(context.request.url);
-    const userId = url.searchParams.get('userId');
-    const holidayId = url.searchParams.get('holidayId');
-    const clearAll = url.searchParams.get('clearAll') === 'true';
+    const redis = getRedis(req);
+    const userId = req.query.userId as string;
+    const holidayId = req.query.holidayId as string;
+    const clearAll = req.query.clearAll === 'true';
     
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'Missing userId' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      res.status(400).json({ error: 'Missing userId' });
+      return;
     }
+    
+    const botToken = process.env.BOT_TOKEN;
     
     // Clear all countdowns for user
     if (clearAll) {
       const userListKey = `user:${userId}:countdowns`;
-      const existingList = await context.env.COUNTDOWNS.get(userListKey);
+      const existingList = await redis.get(userListKey);
       
       if (existingList) {
         const countdownIds: string[] = JSON.parse(existingList);
@@ -180,91 +174,70 @@ export const onRequestDelete: PagesFunction<Env> = async (context) => {
         // Delete all countdown entries
         for (const id of countdownIds) {
           const key = `countdown:${userId}:${id}`;
-          await context.env.COUNTDOWNS.delete(key);
+          await redis.del(key);
         }
         
         // Clear the user's list
-        await context.env.COUNTDOWNS.delete(userListKey);
+        await redis.del(userListKey);
       }
       
       // Send notification that all countdowns are cleared
-      if (context.env.BOT_TOKEN) {
+      if (botToken) {
         const message = `🗑️ <b>All Cleared!</b>\n\nAll your countdown reminders have been removed.\n\nAdd new holidays anytime to start counting down again! 🎉`;
-        await sendTelegramMessage(context.env.BOT_TOKEN, parseInt(userId), message);
+        await sendTelegramMessage(botToken, parseInt(userId), message);
       }
       
-      return new Response(JSON.stringify({ success: true, message: 'All countdowns cleared' }), {
-        status: 200,
-        headers: { 
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-        },
-      });
+      res.json({ success: true, message: 'All countdowns cleared' });
+      return;
     }
     
     // Delete single countdown
     if (!holidayId) {
-      return new Response(JSON.stringify({ error: 'Missing holidayId' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      res.status(400).json({ error: 'Missing holidayId' });
+      return;
     }
     
     const key = `countdown:${userId}:${holidayId}`;
     
     // Get countdown data before deleting (to get the name for notification)
-    const countdownDataStr = await context.env.COUNTDOWNS.get(key);
+    const countdownDataStr = await redis.get(key);
     let countdownName = 'your event';
     if (countdownDataStr) {
       try {
         const countdownData: CountdownData = JSON.parse(countdownDataStr);
         countdownName = countdownData.name;
-      } catch (e) {
+      } catch {
         // Ignore parse errors
       }
     }
     
-    await context.env.COUNTDOWNS.delete(key);
+    await redis.del(key);
     
     // Remove from user's list
     const userListKey = `user:${userId}:countdowns`;
-    const existingList = await context.env.COUNTDOWNS.get(userListKey);
+    const existingList = await redis.get(userListKey);
     if (existingList) {
       const countdownIds: string[] = JSON.parse(existingList);
       const updated = countdownIds.filter(id => id !== holidayId);
-      await context.env.COUNTDOWNS.put(userListKey, JSON.stringify(updated));
+      await redis.set(userListKey, JSON.stringify(updated));
     }
     
     // Send notification that countdown was removed
-    if (context.env.BOT_TOKEN) {
+    if (botToken) {
       const message = `🗑️ <b>Countdown Removed</b>\n\nThe reminder for <b>${countdownName}</b> has been removed.\n\nYou won't receive notifications for this event anymore.`;
-      await sendTelegramMessage(context.env.BOT_TOKEN, parseInt(userId), message);
+      await sendTelegramMessage(botToken, parseInt(userId), message);
     }
     
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
-    });
+    res.json({ success: true });
   } catch (error) {
     console.error('Error deleting countdown:', error);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    res.status(500).json({ error: 'Internal server error' });
   }
-};
+});
 
-// Handle OPTIONS for CORS
-export const onRequestOptions: PagesFunction = async () => {
-  return new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type',
-    },
-  });
-};
+// OPTIONS - CORS preflight (handled by cors middleware, but keeping for compatibility)
+router.options('/', (req: Request, res: Response) => {
+  res.status(204).send();
+});
+
+export default router;
