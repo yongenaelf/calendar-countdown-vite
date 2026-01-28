@@ -1,21 +1,3 @@
-# Build stage
-FROM node:20-alpine AS builder
-
-WORKDIR /app
-
-# Copy package.json
-COPY package.json ./
-
-# Install all dependencies (including dev for TypeScript)
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Build TypeScript
-RUN npm run build
-
-# Production stage
 FROM node:20-alpine
 
 WORKDIR /app
@@ -23,14 +5,14 @@ WORKDIR /app
 # Copy package.json
 COPY package.json ./
 
-# Install production dependencies only
-RUN npm install --omit=dev
+# Install dependencies
+RUN npm install
 
-# Copy built files from builder
-COPY --from=builder /app/dist ./dist
+# Copy source code
+COPY . .
 
 # Expose port
 EXPOSE 3000
 
-# Start the application
-CMD ["node", "dist/index.js"]
+# Start the application using tsx
+CMD ["npx", "tsx", "src/index.ts"]
